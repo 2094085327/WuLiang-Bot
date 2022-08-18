@@ -1,7 +1,6 @@
 package simbot.example.BootAPIUse.OtherAPI;
 
 import catcode.CatCodeUtil;
-import love.forte.common.ioc.annotation.Beans;
 import love.forte.simbot.annotation.Filter;
 import love.forte.simbot.annotation.OnGroup;
 import love.forte.simbot.api.message.containers.AccountInfo;

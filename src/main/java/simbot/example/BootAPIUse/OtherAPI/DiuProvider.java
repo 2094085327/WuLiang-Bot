@@ -5,27 +5,6 @@ package simbot.example.BootAPIUse.OtherAPI;
  * @date 2022/7/25 14:44
  * @user 86188
  */
-//public class DiuProvider {
-//
-//    private String getUrl(Long code, Mode mode) {
-//        String url = "";
-//        switch (mode) {
-//            case DIU:
-//                url = String.valueOf(Mode.DIU) + code;
-//                break;
-//            case PAI:
-//                url = String.valueOf(Mode.PAI) + code;
-//                break;
-//            default:
-//        }
-//
-//        return url;
-//
-//    }
-//
-//    private String when() {
-//        return null;
-//    }
 
 public enum DiuProvider {
 
@@ -41,17 +20,19 @@ public enum DiuProvider {
     // 锤
     POUND("https://api.xingzhige.com/API/pound/?qq=");
 
-    // 2.声明对象属性:private final修饰
-    private final String url;
+    /**
+     * 2.声明对象属性:private final修饰
+     */
+    private final String URL;
 
     DiuProvider(String url) {
-        this.url = url;
+        this.URL = url;
     }
 
     @Override
     public String toString() {
 
-        return url;
+        return URL;
     }
 }
-//}
+

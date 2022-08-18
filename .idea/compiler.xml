@@ -6,16 +6,16 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
-        <module name="simbot-mirai-spring-boot-demo-master" />
+        <module name="WuLiang-Bot" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
-      <module name="simbot-mirai-spring-boot-demo-master" target="8" />
+      <module name="WuLiang-Bot" target="8" />
     </bytecodeTargetLevel>
   </component>
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
-      <module name="simbot-mirai-spring-boot-demo-master" options="-parameters" />
+      <module name="WuLiang-Bot" options="-parameters" />
     </option>
   </component>
 </project>
