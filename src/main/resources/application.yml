@@ -1,0 +1,6 @@
+logging:
+  level:
+    love.forte: Info
+simbot:
+  core:
+    bot-resource-type: both
