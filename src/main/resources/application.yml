@@ -4,3 +4,14 @@ logging:
 simbot:
   core:
     bot-resource-type: both
+  component:
+    mirai:
+      protocol: ipad
+
+
+    #思知人工智能
+artificial:
+  appid: ae8009f3d0c07ae156271f15f28e11e1
+  #${SIZHI_APPID}
+  key: 29af4375c3a146f3adabc3aa56a5eaf0
+  #${SIZHI_SECRET_KEY}+
