@@ -17,10 +17,9 @@ public class kedaya {
     public byte[] makeImage(String left, String right) throws IOException {
         AnimatedGifEncoder encoder = new AnimatedGifEncoder();
 
-        // 项目路径
-        File file = new File(System.getProperty("user.dir"));
+        File file = new File("image/kedaya.gif");
 
-        InputStream inputStream2 = new FileInputStream(file + "\\src\\main\\resources\\image\\kedaya.gif");
+        InputStream inputStream2 = new FileInputStream(file.getAbsoluteFile());
 
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         encoder.start(outputStream);
@@ -90,7 +89,6 @@ public class kedaya {
                     break;
             }
             encoder.addFrame(frame);
-//            ImageIO.write(frame, "png", new File("out/"+i+".png"));
 
         }
         encoder.finish();
@@ -103,7 +101,6 @@ public class kedaya {
         graphics.translate(x, y);
         graphics.rotate((Math.PI / 180) * angle);
         graphics.drawString(text, 0, 0);
-//        Rectangle2D barra=new Rectangle2D.Double(0, 0, 700, 500);
-//        graphics.draw(barra);
+
     }
 }

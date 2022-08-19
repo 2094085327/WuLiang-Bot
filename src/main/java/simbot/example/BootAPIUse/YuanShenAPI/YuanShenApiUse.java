@@ -1,18 +1,27 @@
-package simbot.example.BootAPIUse.YuanShenAPI.GachaInfo;
+package simbot.example.BootAPIUse.YuanShenAPI;
 
+import cn.hutool.crypto.asymmetric.Sign;
 import love.forte.common.ioc.annotation.Beans;
 import love.forte.simbot.annotation.Filter;
 import love.forte.simbot.annotation.OnGroup;
+import love.forte.simbot.api.message.MessageContentBuilder;
+import love.forte.simbot.api.message.MessageContentBuilderFactory;
 import love.forte.simbot.api.message.containers.GroupInfo;
 import love.forte.simbot.api.message.events.GroupMsg;
 import love.forte.simbot.api.sender.MsgSender;
 import love.forte.simbot.filter.MatchType;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import simbot.example.BootAPIUse.YuanShenAPI.GachaInfo.YuanApi;
+import simbot.example.BootAPIUse.YuanShenAPI.GachaInfo.picture;
+import simbot.example.BootAPIUse.YuanShenAPI.Sign.GenShinSign;
 import simbot.example.Util.CatUtil;
 import simbot.example.core.common.Constant;
 
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
 import java.util.Arrays;
 
 /**
@@ -23,11 +32,18 @@ import java.util.Arrays;
 @Service
 public class YuanShenApiUse extends Constant {
 
+    /**
+     * 通过自动装配构建消息工厂
+     */
+    @Autowired
+    MessageContentBuilderFactory messageContentBuilderFactory;
+
+
     @OnGroup
     @Filter(value = "原神抽卡分析", matchType = MatchType.CONTAINS, trim = true)
     public void gaChaLog(GroupMsg groupMsg, MsgSender msgSender) throws Exception {
         // 项目路径
-        File file = new File(System.getProperty("user.dir"));
+        //File file = new File(System.getProperty("user.dir"));
 
 
         GroupInfo groupInfo = groupMsg.getGroupInfo();
@@ -60,10 +76,24 @@ public class YuanShenApiUse extends Constant {
 
                 picture.allPictureMake();
 
-                msgSender.SENDER.sendGroupMsg(groupMsg, CatUtil.getImage(file + "\\src\\main\\resources\\yuanImage\\finally.png").toString());
+                InputStream inputStream = new FileInputStream(new File("yuanImage/finally.png").getAbsoluteFile());
+
+                // 创建消息构建器，用于在服务器上发送图片
+                MessageContentBuilder messageContentBuilder = messageContentBuilderFactory.getMessageContentBuilder();
+
+                msgSender.SENDER.sendGroupMsg(groupMsg,messageContentBuilder.image(inputStream).build());
 
             }
         }
     }
-}
 
+
+    @OnGroup
+    @Filter(value = "原神签到", matchType = MatchType.CONTAINS, trim = true)
+    public void genShinSign(GroupMsg groupMsg, MsgSender msgSender) throws Exception {
+        GenShinSign sign = new GenShinSign();
+        sign.doSign();
+
+    }
+
+}

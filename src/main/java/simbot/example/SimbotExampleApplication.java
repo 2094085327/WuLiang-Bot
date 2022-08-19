@@ -3,6 +3,7 @@ package simbot.example;
 import love.forte.simbot.spring.autoconfigure.EnableSimbot;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.builder.SpringApplicationBuilder;
 
 /**
  * 启动类。
@@ -14,8 +15,11 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 @EnableSimbot
 @SpringBootApplication
 public class SimbotExampleApplication {
+
     public static void main(String[] args) {
-        SpringApplication.run(SimbotExampleApplication.class, args);
+        SpringApplicationBuilder builder = new SpringApplicationBuilder(SimbotExampleApplication.class);
+        builder.headless(false).run(args);
+        //SpringApplication.run(SimbotExampleApplication.class, args);
     }
 
 }

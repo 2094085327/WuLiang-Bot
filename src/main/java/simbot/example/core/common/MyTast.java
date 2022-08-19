@@ -1,8 +1,6 @@
 package simbot.example.core.common;
 
 import catcode.CatCodeUtil;
-import love.forte.common.ioc.annotation.Beans;
-import love.forte.common.ioc.annotation.Depend;
 import love.forte.simbot.api.sender.BotSender;
 import love.forte.simbot.bot.Bot;
 import love.forte.simbot.bot.BotManager;
@@ -11,6 +9,9 @@ import love.forte.simbot.timer.EnableTimeTask;
 import org.springframework.stereotype.Service;
 import simbot.example.BootAPIUse.API;
 import simbot.example.BootAPIUse.OtherAPI.NewsApi;
+import simbot.example.BootAPIUse.YuanShenAPI.Sign.GenShinSign;
+
+import javax.annotation.Resource;
 
 
 /**
@@ -26,17 +27,24 @@ public class MyTast extends Constant {
     static int i = 1;
 
     /**
+     * 构建机器人管理器
+     */
+    @Resource
+    public BotManager manager;
+
+    private void sendGroupMsg(String g, String msg) {
+        Bot bot = manager.getBot("341677404");
+        BotSender bs = bot.getSender();
+        bs.SENDER.sendGroupMsg(g, msg);
+    }
+
+    /**
      * 调用每日一言APi
      */
     public API api = new API();
 
     TimeTranslate time2 = new TimeTranslate();
 
-    /**
-     * 构建机器人管理器
-     */
-    @Depend
-    private BotManager manager;
 
     /**
      * 每日一言构建定时器
@@ -76,16 +84,13 @@ public class MyTast extends Constant {
         }
     }
 
-//    @Cron(value = "0 1 0 * * ? *")
-//    public void genShinSign() {
-//        GenShinSignMiHoYo genShinSignMiHoYo = new GenShinSignMiHoYo();
-//        genShinSignMiHoYo.doSign();
-//
-//        Bot bot = manager.getBot("341677404");
-//        BotSender botSender = bot.getSender();
-//
-//        botSender.SENDER.sendGroupMsg("140469072", "已进行米游社签到");
-//    }
+    @Cron(value = "0 15 00 * * ? *")
+    public void genShinSign() {
+
+        GenShinSign genShinSign = new GenShinSign();
+        genShinSign.doSign();
+        sendGroupMsg("140469072", "已进行米游社签到");
+    }
 
 
 /**

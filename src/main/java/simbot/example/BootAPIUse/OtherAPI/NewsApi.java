@@ -12,14 +12,24 @@ import java.util.Objects;
  * @user 86188
  */
 public class NewsApi {
-    // 新闻API
+
+    /**
+     * 新闻API
+     */
     public String url = "https://c.m.163.com/nc/article/headline/T1348647853363/0-40.html";
     public String jsonStr = HttpUtil.get(url);
     public JSONObject object = JSONObject.fromObject(jsonStr);
-    // 获得名为"T1348647853363"的String
+
+    /**
+     * 获得名为"T1348647853363"的String
+     */
     public String T1348647853363 = object.getString("T1348647853363");
 
-    // 获取新闻标题，时间，内容
+    /**
+     * 获取新闻标题，时间，内容
+     * @param index 下标
+     * @return 返回新闻
+     */
     public String news(int index) {
         JSONArray jsonArray;
         jsonArray = new JSONArray(T1348647853363);
@@ -29,7 +39,11 @@ public class NewsApi {
                 + jsonArray.getJSONObject(index).getString("digest")+"...";
     }
 
-    // 获取新闻图片地址
+    /**
+     * 获取新闻图片地址
+     * @param index 下标
+     * @return 获取新闻图片地址
+     */
     public String image(int index) {
         JSONArray jsonArray;
         jsonArray = new JSONArray(T1348647853363);
@@ -40,7 +54,7 @@ public class NewsApi {
     // 获取新闻数组长度
     public int length() {
         JSONArray jsonArray;
-        jsonArray = new JSONArray(T1348647853363);
+         jsonArray = new JSONArray(T1348647853363);
         return jsonArray.length();
     }
 
