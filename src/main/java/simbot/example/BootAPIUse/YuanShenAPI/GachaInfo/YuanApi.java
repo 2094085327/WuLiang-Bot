@@ -21,6 +21,7 @@ public class YuanApi extends YuanConstant {
     public static double finProbability;
     public static int finFiveStar;
     public static float fincount;
+    public static float poolCount = 3;
 
     /**
      * 获取解析后的真实URL并加入参数
@@ -197,18 +198,30 @@ public class YuanApi extends YuanConstant {
         String averageFiveString = String.format("%.1f", averageFive);
 
         // 欧非判断公式 以(1-平均出金数/90)*50%+(不歪的几率*50%) 作为概率
-        double probability = (1 - (averageFive / 90) + guaranteedP * 0.5) * 100;
+        double probability = (1 - (averageFive / 80) + guaranteedP * 0.5) * 100;
+        if (!rangeInDefined(probability)) {
+            probability = 0;
+            averageFiveString ="--";
+            alreadyCost = count;
+            poolCount--;
+        }
+
 
         fincount += count;
         finFiveStar += fiveStar;
-        finProbability += probability * 0.33;
+        finProbability += probability * (1 / poolCount);
 
         picture.rolePole(averageFiveString, String.valueOf(count), fivePeopleCount, String.valueOf(alreadyCost), limited, probability);
 
         System.out.println("——角色池完成——");
     }
 
-
+    /**
+     * 获取武器池信息
+     *
+     * @param url 待分析的链接
+     * @throws Exception 可能存在的异常
+     */
     public static void getGachaArmsInfo(String url) throws Exception {
         Robot r = new Robot();
 
@@ -307,16 +320,28 @@ public class YuanApi extends YuanConstant {
 
         // 欧非判断公式 以(1-平均出金数/90)+(不歪的几率*50%) 作为概率
         double probability = (1 - (averageFive / 80) + guaranteedP * 0.5) * 100;
+        if (!rangeInDefined(probability)) {
+            probability = 0;
+            averageFiveString ="--";
+            alreadyCost = count;
+            poolCount--;
+        }
 
         picture.armsPole(averageFiveString, String.valueOf(count), fivePeopleCount, String.valueOf(alreadyCost), limited, probability);
 
         fincount += count;
         finFiveStar += fiveStar;
-        finProbability += probability * 0.33;
+        finProbability += probability * (1 / poolCount);
 
         System.out.println("——武器池完成——");
     }
 
+    /**
+     * 获得常驻池信息
+     *
+     * @param url 待分析的链接
+     * @throws Exception 可能的异常
+     */
     public static void getGachaPermanentInfo(String url) throws Exception {
         Robot r = new Robot();
 
@@ -397,12 +422,18 @@ public class YuanApi extends YuanConstant {
 
         // 欧非判断公式
         double probability = (1 - (averageFive / 90)) * 100;
+        if (!rangeInDefined(probability)) {
+            probability = 0;
+            averageFiveString ="--";
+            alreadyCost = count;
+            poolCount--;
+        }
 
         picture.permanentPool(averageFiveString, String.valueOf(count), fivePeopleCount, String.valueOf(alreadyCost), String.valueOf(fiveStar), probability);
 
         fincount += count;
         finFiveStar += fiveStar;
-        finProbability += probability * 0.33;
+        finProbability += probability * (1 / poolCount);
 
         System.out.println("——常驻池完成——");
 
@@ -416,6 +447,17 @@ public class YuanApi extends YuanConstant {
         picture.allDataMake(aveFive, String.valueOf(String.format("%.0f", fincount)), String.valueOf(finFiveStar), finProbability);
 
     }
+
+    /**
+     * 判断概率范围
+     *
+     * @param current 要判断的值
+     * @return 返回判断
+     */
+    public static boolean rangeInDefined(double current) {
+        return Math.max(0, current) == Math.min(current, 150);
+    }
+
 
 }
 

@@ -1,7 +1,5 @@
 package simbot.example.BootAPIUse.YuanShenAPI;
 
-import cn.hutool.crypto.asymmetric.Sign;
-import love.forte.common.ioc.annotation.Beans;
 import love.forte.simbot.annotation.Filter;
 import love.forte.simbot.annotation.OnGroup;
 import love.forte.simbot.api.message.MessageContentBuilder;
@@ -15,9 +13,7 @@ import org.springframework.stereotype.Service;
 import simbot.example.BootAPIUse.YuanShenAPI.GachaInfo.YuanApi;
 import simbot.example.BootAPIUse.YuanShenAPI.GachaInfo.picture;
 import simbot.example.BootAPIUse.YuanShenAPI.Sign.GenShinSign;
-import simbot.example.Util.CatUtil;
 import simbot.example.core.common.Constant;
-
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -42,9 +38,6 @@ public class YuanShenApiUse extends Constant {
     @OnGroup
     @Filter(value = "原神抽卡分析", matchType = MatchType.CONTAINS, trim = true)
     public void gaChaLog(GroupMsg groupMsg, MsgSender msgSender) throws Exception {
-        // 项目路径
-        //File file = new File(System.getProperty("user.dir"));
-
 
         GroupInfo groupInfo = groupMsg.getGroupInfo();
         int groupBanId = (int) Arrays.stream(groupBanIdList).filter(groupInfo.getGroupCode()::contains).count();
@@ -81,7 +74,7 @@ public class YuanShenApiUse extends Constant {
                 // 创建消息构建器，用于在服务器上发送图片
                 MessageContentBuilder messageContentBuilder = messageContentBuilderFactory.getMessageContentBuilder();
 
-                msgSender.SENDER.sendGroupMsg(groupMsg,messageContentBuilder.image(inputStream).build());
+                msgSender.SENDER.sendGroupMsg(groupMsg, messageContentBuilder.image(inputStream).build());
 
             }
         }
@@ -90,7 +83,7 @@ public class YuanShenApiUse extends Constant {
 
     @OnGroup
     @Filter(value = "原神签到", matchType = MatchType.CONTAINS, trim = true)
-    public void genShinSign(GroupMsg groupMsg, MsgSender msgSender) throws Exception {
+    public void genShinSign(GroupMsg groupMsg, MsgSender msgSender) {
         GenShinSign sign = new GenShinSign();
         sign.doSign();
 
