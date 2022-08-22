@@ -345,50 +345,6 @@ public class GroupListener extends Constant {
     }
 
     /**
-     * 人工智能回复模块
-     * 在收到@时调用人工智能Api进行回复
-     *
-     * @param groupMsg  用于获取群聊消息，群成员信息等
-     * @param msgSender 用于在群聊中发送消息
-     */
-    @OnGroup
-    @Filter(atBot = true)
-    public void chat(GroupMsg groupMsg, MsgSender msgSender) {
-
-        Sender sender = msgSender.SENDER;
-        GroupInfo groupInfo = groupMsg.getGroupInfo();
-        AccountInfo accountInfo = groupMsg.getAccountInfo();
-        String msg = groupMsg.getMsg();
-
-        // 将数组通过流的形式遍历并计数有效的指令个数
-        int listSize = (int) Arrays.stream(list).filter(msg::contains).count();
-        int groupBanId = (int) Arrays.stream(groupBanIdList).filter(groupInfo.getGroupCode()::contains).count();
-
-        // 当输入的msg通过contains匹配到相应指令时listSize值为1，无相应指令时为0，在无指令时调用API
-        if (listSize != 1) {
-            // 将群号为“637384877”的群排除在人工智能答复模块外
-            if (groupBanId != 1 && BOOTSTATE) {
-                String reMsg = api.result(groupMsg.getText());
-                sender.sendGroupMsg(groupMsg, reMsg);
-
-                CatCodeUtil util = CatCodeUtil.INSTANCE;
-
-                String voice = util.toCat("voice", true, "file="
-                        + api.record(reMsg));
-                sender.sendGroupMsg(groupMsg, voice);
-            }
-            // 当被Bot在被屏蔽的群组中被@时将消息转发至User
-            if (groupBanId == 1) {
-
-                msgSender.SENDER.sendPrivateMsg(USERID1, "[" + accountInfo.getAccountCode()
-                        + "-" + accountInfo.getAccountNickname() + "]正在屏蔽群组["
-                        + groupInfo.getGroupCode() + "-" + groupInfo.getGroupName() + "]@Bot");
-                msgSender.SENDER.sendPrivateMsg(USERID1, "消息内容为:" + groupMsg.getMsg());
-            }
-        }
-    }
-
-    /**
      * 刷屏模块
      * #@Filter() 注解为消息过滤器
      *

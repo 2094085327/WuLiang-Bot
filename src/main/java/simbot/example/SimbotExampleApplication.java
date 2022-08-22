@@ -4,6 +4,8 @@ import love.forte.simbot.spring.autoconfigure.EnableSimbot;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
+import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 
 /**
  * 启动类。
@@ -14,6 +16,8 @@ import org.springframework.boot.builder.SpringApplicationBuilder;
  */
 @EnableSimbot
 @SpringBootApplication
+@ConfigurationPropertiesScan
+@EnableConfigurationProperties
 public class SimbotExampleApplication {
 
     public static void main(String[] args) {

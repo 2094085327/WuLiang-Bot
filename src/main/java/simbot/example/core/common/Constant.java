@@ -34,7 +34,7 @@ public class Constant {
 
     public String[] list = {"天气", "青年大学习", "禁言", "@全体成员", "来点好康的",
             "看看动漫", "来点原神", ".关机", ".开机", "/help", "/丢", "/拍", "/抓", "/抱",
-            "/锤", "/tq", "/dl", "/刷屏"};
+            "/锤", "/tq", "/dl", "/刷屏","测试"};
 
     public String[] groupBanIdList = {"637384877"};
 

@@ -30,44 +30,6 @@ public class API extends Constant {
     public Map<String, Object> params = new HashMap<>();
 
     /**
-     * 人工智能APi
-     *
-     * @param message 接收传递来的消息
-     * @return 当能够正常处理时返回AI的自动回复，否则当catch到异常时返回猫猫码狗头
-     */
-    public String result(String message) {
-
-        // 接口地址
-        String requestUrl = "https://api.ownthink.com/bot?spoken=" + message;
-
-        // 去除消息中的空格
-        // 将中文空格替换为英文空格
-        message = message.trim();
-        message = message.replace((char) 12288, ' ');
-
-        //请求数据""
-        //params用于存储请求数据的参数
-
-        params.put("appid", appid);
-        params.put("SECRET_KEY", key);
-        params.put("spoken", message);
-        try {
-            //调用HttpUtil.post方法，这个方法主要用于请求地址，并加上请求参数
-            String jsonStr = HttpUtil.post(requestUrl, params);
-
-            //JSONObject从String中得到数据，提取数据，并且输出数据
-            //从字符串转成java代码
-            JSONObject jsonObj = JSONObject.fromObject(jsonStr);
-            JSONObject data = jsonObj.getJSONObject("data");
-            JSONObject info = data.getJSONObject("info");
-            return info.getString("text");
-        } catch (Exception e) {
-
-            return "[CAT:face,id=277]";
-        }
-    }
-
-    /**
      * 每日一言APi-通过正则匹配获取HTML格式的信息
      *
      * @return 返回从api获得的每日一言

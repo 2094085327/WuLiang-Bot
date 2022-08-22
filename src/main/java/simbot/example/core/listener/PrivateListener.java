@@ -11,14 +11,17 @@ import love.forte.simbot.api.message.events.PrivateMsg;
 import love.forte.simbot.api.sender.MsgSender;
 import love.forte.simbot.api.sender.Sender;
 import love.forte.simbot.filter.MatchType;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import simbot.example.BootAPIUse.API;
+import simbot.example.BootAPIUse.MlyaiAPIUSR.MlyaiApi;
 import simbot.example.Util.CatUtil;
 import simbot.example.core.common.Constant;
 import simbot.example.core.common.TimeTranslate;
 import simbot.example.core.common.Writing;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -32,6 +35,10 @@ import java.util.concurrent.TimeUnit;
  */
 @Service
 public class PrivateListener extends Constant {
+
+    @Autowired
+    MlyaiApi mlyaiApi = new MlyaiApi();
+
 
     /**
      * 调用API接口的类
@@ -122,69 +129,6 @@ public class PrivateListener extends Constant {
         writer.write(personMsg + "\n");
     }
 
-    /**
-     * 私聊消息回复与撤回
-     *
-     * @param privateMsg 私聊消息获取
-     * @param sender     构建发送器
-     * @param msgSender  消息SENDER GETTER SETTER
-     */
-    @OnPrivate
-    public void replay(PrivateMsg privateMsg, Sender sender, MsgSender msgSender) {
-
-        String msgs = privateMsg.getMsg();
-
-        // 创建线程池
-        THREAD_POOL = new ThreadPoolExecutor(50, 50, 10000,
-                TimeUnit.SECONDS, new LinkedBlockingQueue<>(50), r -> {
-            Thread thread = new Thread(r);
-            thread.setName(String.format("newThread%d", thread.getId()));
-            return thread;
-        });
-
-        // 将数组通过流的形式遍历并计数有效的指令个数
-        int listSize = (int) Arrays.stream(list).filter(msgs::contains).count();
-
-        if (BOOTSTATE && listSize != 1) {
-
-            //检测到特定私信内容进行特定回复
-            if ("hi".equals(privateMsg.getMsg()) || "你好".equals(privateMsg.getMsg())) {
-                CatCodeUtil util = CatCodeUtil.INSTANCE;
-                sender.sendPrivateMsg(privateMsg, "嗨！");
-
-                // 项目路径
-                File file = new File(System.getProperty("user.dir"));
-                System.out.println(file);
-                String voice = util.toCat("voice", true, "file=" + api.record(msgs));
-
-                CatUtil.getRecord(file + "\\resources\\voicePack\\audio.wav");
-
-                System.out.println(voice);
-
-                sender.sendPrivateMsg(privateMsg, voice);
-
-
-            } else {
-
-                THREAD_POOL.execute(() -> {
-
-                    // 获取消息的flag
-                    MessageGet.MessageFlag<? extends MessageGet.MessageFlagContent>
-                            flag = (MessageGet.MessageFlag<? extends MessageGet.MessageFlagContent>) sender.sendPrivateMsg(privateMsg, api.result(privateMsg.getText())).get();
-
-                    // 通过flag撤回消息
-                    try {
-                        // 休眠10000ms
-                        Thread.sleep(10000);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                    // 撤回操作
-                    msgSender.SETTER.setMsgRecall(flag);
-                });
-            }
-        }
-    }
 }
 
 
