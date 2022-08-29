@@ -12,8 +12,8 @@ import love.forte.simbot.api.message.events.PrivateMsg;
 import love.forte.simbot.api.sender.MsgSender;
 import love.forte.simbot.api.sender.Sender;
 import org.springframework.stereotype.Service;
-import simbot.example.BootAPIUse.API;
 import simbot.example.core.common.Constant;
+import simbot.example.BootAPIUse.API;
 
 import java.io.File;
 import java.io.IOException;

@@ -1,33 +1,42 @@
-# Simbot springboot starter demo - Mirai
+<div align="center">
+    <img src="http://gchat.qpic.cn/gchatpic_new/2094085327/695525945-2916960648-F41E176B39C491DECA3AA5D2373FCE43/0?term&#61;3" alt="logo" style="width:233px ;height:233px;border-radius:50%"/>
+    <p>
+    	<h2>
+        	无量姬的Q群机器人
+    	</h2>
+</div>
 
-这是[simple-robot](https://github.com/ForteScarlet/simpler-robot) 框架使用[mirai组件](https://github.com/ForteScarlet/simpler-robot/tree/dev/component/component-mirai) 对接[Mirai](https://github.com/mamoe/mirai) 并整合为 Spring Boot 的Demo项目。
+该项目为Springboot项目，此项目基于[simple bot v2]
 
-## 需要做的
-### fork/clone
-fork或者clone此项目到你的本地，并使用IDE工具打开并构建它。
+## 项目文档
+暂时没有
 
-### 修改配置文件
-打开文件 [application.yml](src/main/resources/application.yml) 并修改其中的 `simbot.core.bots` 项为你测试用的QQ账号，例如：
+## 项目地址
+WuLiang-Bot
+[GitHub](https://github.com/2094085327/WuLiang-Bot)
+
+## 运行环境
+
+`maven` `Java1.8+` `Mysql 8.0 `
+
+## 你需要掌握的知识
+1.能够主观的，能动的，熟练的运用[`百度`](https://www.baidu.com)进行查询
+
+2.对`Springboot`有基础的了解,建议先掌握`Spring`
+
+3.对`Mybatis-Plus`有一定了解，建议先掌握`Mybatis`
+
+# 如何开始?
+1.打开`src/main/resources/simbot-bots`文件夹, 在里面创建一个`*.bot`文件, `*`可以是任意字符, [参考](https://www.yuque.com/simpler-robot/simpler-robot-doc/fk6o3e#iUKbX)
+
+2.打开`\src\main\resources\`文件夹, 在里面创建一个`application-*.yml`文件, 如果你会`springboot`, 应该能看懂这一步, 下面是本项目所需要的配置项
 ```yaml
-simbot: 
-  core:
-    bots: 123456789:password
+#配置数据源
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/genshin?useSSL=FALSE&serverTimezone=UTC
+    username: root
+    password: 
+    type: com.alibaba.druid.pool.DruidDataSource 
 ```
-
-### 保证安静
-将你的bot放在一些测试用的群而不是一些大型群。
-
-### 阅读
-- [listener](src/main/java/simbot/example/listener) 包下为一些监听函数示例。阅读它们的注释，并可以试着修改它们。
-
-### 运行
-执行[SimbotExampleApplication](src/main/java/simbot/example/SimbotExampleApplication.java) 中的main方法。
-
-### 验证
-如果你是第一次使用此框架，且出现了诸如需要“滑动验证”等相关错误，你可以尝试先使用一次 [simbot-mirai-login-solver-selenium-helperPack](https://github.com/simple-robot/simbot-mirai-login-solver-selenium-helperPack) 来使腾讯记住你的设备信息。
-
-以及，记得关闭账号中与“设备锁”、“安全保护”等相关内容。
-
-### 协助
-如果你有一个好的示例点子，你可以通过[github pr](https://github.com/simple-robot/simbot-mirai-spring-boot-demo/pulls) 来协助此demo项目的更新。
-

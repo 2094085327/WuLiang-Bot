@@ -1,4 +1,4 @@
-//package simbot.example.core.listener;
+//package simbot.example.wuLiang.core.listener;
 //
 //import catcode.CatCodeUtil;
 //import love.forte.common.ioc.annotation.Beans;

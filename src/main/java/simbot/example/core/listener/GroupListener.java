@@ -1,6 +1,5 @@
 package simbot.example.core.listener;
 
-import catcode.CatCodeUtil;
 import love.forte.common.ioc.annotation.Depend;
 import love.forte.simbot.annotation.*;
 import love.forte.simbot.api.message.MessageContent;
@@ -16,7 +15,6 @@ import love.forte.simbot.api.sender.Sender;
 import love.forte.simbot.api.sender.Setter;
 import love.forte.simbot.bot.BotManager;
 import love.forte.simbot.filter.MatchType;
-
 import org.springframework.stereotype.Service;
 import simbot.example.BootAPIUse.API;
 import simbot.example.Util.CatUtil;
@@ -147,21 +145,7 @@ public class GroupListener extends Constant {
         GroupInfo groupInfo = groupMsg.getGroupInfo();
         int groupBanId = (int) Arrays.stream(groupBanIdList).filter(groupInfo.getGroupCode()::contains).count();
         if (groupBanId != 1) {
-            String helps = "[无量姬的指令]\n" +
-                    "一、含参指令\n" +
-                    "1.【天气查询】 : /tq 城市\n(别名:XX天气)\n\n" +
-                    "2.【地理查询】 : /dl 城市\n(别名:XX地理)\n\n" +
-                    "3.【群友互动】: 后接@人\n " +
-                    "   ①/丢   ②/拍   ③/抓\n" +
-                    "    ④/抱   ⑤/锤\n\n" +
-                    "4.【抽卡分析】 : 原神抽卡分析 复制到的抽卡链接\n\n" +
-                    "5.【可达鸭】 : 可达鸭 左侧文字 右侧文字\n\n" +
-                    "二、无参指令\n" +
-                    "1.【青年大学习】:\n查看当期青年大学习问题与答案\n\n" +
-                    "2.【来点好康的】:\n阿姬的珍藏品~\n\n" +
-                    "3.【来点原神】:\n阿姬的原神图片\n\n" +
-                    "3.【看看动漫】:\n阿姬是个二刺螈";
-            msgSender.SENDER.sendGroupMsg(groupMsg, helps);
+            msgSender.SENDER.sendGroupMsg(groupMsg, Constant.HELPS);
         }
     }
 
@@ -343,6 +327,7 @@ public class GroupListener extends Constant {
             }
         }
     }
+
 
     /**
      * 刷屏模块

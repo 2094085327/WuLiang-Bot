@@ -1,6 +1,5 @@
 package simbot.example.BootAPIUse.GeographyAPI;
 
-import love.forte.common.ioc.annotation.Beans;
 import love.forte.simbot.annotation.Filter;
 import love.forte.simbot.annotation.FilterValue;
 import love.forte.simbot.annotation.OnGroup;

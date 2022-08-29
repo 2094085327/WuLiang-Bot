@@ -1,28 +1,22 @@
 package simbot.example.core.listener;
 
-import catcode.CatCodeUtil;
 import love.forte.simbot.annotation.Filter;
 import love.forte.simbot.annotation.Listen;
 import love.forte.simbot.annotation.OnPrivate;
 import love.forte.simbot.api.message.containers.AccountInfo;
 import love.forte.simbot.api.message.containers.BotInfo;
-import love.forte.simbot.api.message.events.MessageGet;
 import love.forte.simbot.api.message.events.PrivateMsg;
 import love.forte.simbot.api.sender.MsgSender;
 import love.forte.simbot.api.sender.Sender;
 import love.forte.simbot.filter.MatchType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import simbot.example.BootAPIUse.API;
 import simbot.example.BootAPIUse.MlyaiAPIUSR.MlyaiApi;
-import simbot.example.Util.CatUtil;
 import simbot.example.core.common.Constant;
 import simbot.example.core.common.TimeTranslate;
 import simbot.example.core.common.Writing;
+import simbot.example.BootAPIUse.API;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.Arrays;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -66,6 +60,17 @@ public class PrivateListener extends Constant {
         } else {
             msgSender.SENDER.sendPrivateMsg(privateMsg, "你没有姬姬的权限哦~");
         }
+    }
+
+    /**
+     * 解除禁言模块
+     * #@Filter() 注解为消息过滤器
+     * @param msgSender 用于在私聊中发送消息
+     */
+    @OnPrivate
+    @Filter(value = "发消息", matchType = MatchType.REGEX_MATCHES, trim = true)
+    public void sendmsg(MsgSender msgSender, PrivateMsg privateMsg) {
+        msgSender.SENDER.sendPrivateMsg(2094085327, "早，这是测试");
     }
 
     /**

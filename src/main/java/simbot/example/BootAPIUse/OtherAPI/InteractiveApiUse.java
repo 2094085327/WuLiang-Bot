@@ -9,8 +9,8 @@ import love.forte.simbot.api.sender.MsgSender;
 import love.forte.simbot.api.sender.Sender;
 import love.forte.simbot.filter.MatchType;
 import org.springframework.stereotype.Service;
-import simbot.example.Util.CatUtil;
 import simbot.example.core.common.Constant;
+import simbot.example.Util.CatUtil;
 
 
 /**

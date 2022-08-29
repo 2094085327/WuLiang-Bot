@@ -516,7 +516,7 @@ public class picture {
      *
      * @throws IOException 抛出IO流异常
      */
-    public static void allPictureMake() throws IOException {
+    public static void allPictureMake() throws Exception {
 
         //读取总数据图片
         BufferedImage allData = ImageIO.read(new File("yuanImage/allData.png").getAbsoluteFile());
@@ -544,6 +544,12 @@ public class picture {
         g2d.dispose();
         ImageIO.write(bi, "png", new File("yuanImage/sec1.png").getAbsoluteFile());
 
+        /*
+         * 增加1秒延迟..避免在服务器中由于服务器性能太差导致的图片IO流异常
+         * 后期可能可以优化
+         */
+        Robot r = new Robot();
+        r.delay(1000);
 
         //读取总数据图片
         BufferedImage backImg = ImageIO.read(new File("yuanImage/sec1.png").getAbsoluteFile());
@@ -564,7 +570,7 @@ public class picture {
 
         gd.dispose();
 
-        //保存新图片
+        //保存新图片.getAbsoluteFile()
         ImageIO.write(backImg, "png", new File("yuanImage/finally.png").getAbsoluteFile());
     }
 

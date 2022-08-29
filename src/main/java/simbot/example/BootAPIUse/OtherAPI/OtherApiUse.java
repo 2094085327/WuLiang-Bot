@@ -12,8 +12,8 @@ import love.forte.simbot.api.sender.Sender;
 import love.forte.simbot.filter.MatchType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import simbot.example.BootAPIUse.API;
 import simbot.example.core.common.Constant;
+import simbot.example.BootAPIUse.API;
 
 import java.io.IOException;
 import java.util.Arrays;

@@ -3,12 +3,12 @@ package simbot.example.BootAPIUse.MlyaiAPIUSR;
 import cn.hutool.http.HttpUtil;
 import com.alibaba.fastjson.JSON;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
-import java.io.IOException;
 import java.util.HashMap;
 
 /**
@@ -16,6 +16,7 @@ import java.util.HashMap;
  * @date 2022/8/21 20:54
  * @user 86188
  */
+@EqualsAndHashCode(callSuper = true)
 @Data
 @Component
 @ConfigurationProperties(prefix = "mlyaiuse")
@@ -33,7 +34,7 @@ public class MlyaiApi extends MlyaiConstant {
         this.apisecret = apisecret;
     }
 
-    public String chat(String content, String id, String fromName, Integer type, String groupId, String replyMember) throws IOException {
+    public String chat(String content, String id, String fromName, Integer type, String groupId, String replyMember) {
         // 去除消息中的空格
         // 将中文空格替换为英文空格
         content = content.trim();
@@ -48,7 +49,6 @@ public class MlyaiApi extends MlyaiConstant {
         body.put("fromName", fromName);
         body.put("to", groupId);
         body.put("toName", replyMember);
-        System.out.println(body);
 
         HashMap<String, String> headers = new HashMap<>(3);
         headers.put("Content-Type", "application/json;charset=UTF-8");
@@ -61,16 +61,10 @@ public class MlyaiApi extends MlyaiConstant {
         net.sf.json.JSONObject jsonObj = net.sf.json.JSONObject.fromObject(jsonStr);
         String code = jsonObj.getString("code");
 
-        System.out.println(jsonObj);
-
-        System.out.println(code);
-
         if (codeOk.equals(code)) {
             String data = jsonObj.getString("data");
             JSONArray jsonArray;
             jsonArray = new JSONArray(data);
-
-            System.out.println(jsonArray.getJSONObject(0).getString("content"));
 
             return jsonArray.getJSONObject(0).getString("content");
         } else {

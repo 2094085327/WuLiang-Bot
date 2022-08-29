@@ -1,4 +1,4 @@
-package simbot.example.BootAPIUse.YuanShenAPI;
+package simbot.example.BootAPIUse.YuanShenAPI.GachaInfo;
 
 import love.forte.simbot.annotation.Filter;
 import love.forte.simbot.annotation.OnGroup;
@@ -8,11 +8,9 @@ import love.forte.simbot.api.message.containers.GroupInfo;
 import love.forte.simbot.api.message.events.GroupMsg;
 import love.forte.simbot.api.sender.MsgSender;
 import love.forte.simbot.filter.MatchType;
+import net.coobird.thumbnailator.Thumbnails;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import simbot.example.BootAPIUse.YuanShenAPI.GachaInfo.YuanApi;
-import simbot.example.BootAPIUse.YuanShenAPI.GachaInfo.picture;
-import simbot.example.BootAPIUse.YuanShenAPI.Sign.GenShinSign;
 import simbot.example.core.common.Constant;
 
 import java.io.File;
@@ -73,20 +71,15 @@ public class YuanShenApiUse extends Constant {
 
                 // 创建消息构建器，用于在服务器上发送图片
                 MessageContentBuilder messageContentBuilder = messageContentBuilderFactory.getMessageContentBuilder();
+                try {
+                    Thumbnails.of(new File("yuanImage/finally.png")).scale(0.25).toFile(new File("yuanImage/finally.png"));
+                } catch (Exception e) {
+                    msgSender.SENDER.sendGroupMsg(groupMsg, "压缩异常！");
+                }
 
                 msgSender.SENDER.sendGroupMsg(groupMsg, messageContentBuilder.image(inputStream).build());
 
             }
         }
     }
-
-
-    @OnGroup
-    @Filter(value = "原神签到", matchType = MatchType.CONTAINS, trim = true)
-    public void genShinSign(GroupMsg groupMsg, MsgSender msgSender) {
-        GenShinSign sign = new GenShinSign();
-        sign.doSign();
-
-    }
-
 }

@@ -1,7 +1,6 @@
 package simbot.example.BootAPIUse.PictureAPI;
 
 import catcode.CatCodeUtil;
-import love.forte.common.ioc.annotation.Beans;
 import love.forte.simbot.annotation.Filter;
 import love.forte.simbot.annotation.OnGroup;
 import love.forte.simbot.api.message.containers.GroupInfo;
@@ -12,9 +11,9 @@ import love.forte.simbot.api.sender.Sender;
 import love.forte.simbot.api.sender.Setter;
 import love.forte.simbot.filter.MatchType;
 import org.springframework.stereotype.Service;
-import simbot.example.BootAPIUse.API;
 import simbot.example.core.common.Constant;
 import simbot.example.core.common.TimeTranslate;
+import simbot.example.BootAPIUse.API;
 
 
 import java.util.Arrays;

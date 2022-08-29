@@ -1,17 +1,25 @@
 package simbot.example.core.common;
 
 import catcode.CatCodeUtil;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import love.forte.simbot.api.message.results.GroupMemberInfo;
 import love.forte.simbot.api.sender.BotSender;
 import love.forte.simbot.bot.Bot;
 import love.forte.simbot.bot.BotManager;
 import love.forte.simbot.timer.Cron;
 import love.forte.simbot.timer.EnableTimeTask;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import simbot.example.BootAPIUse.API;
 import simbot.example.BootAPIUse.OtherAPI.NewsApi;
 import simbot.example.BootAPIUse.YuanShenAPI.Sign.GenShinSign;
+import simbot.example.Enity.GenShinUser;
+import simbot.example.Mapper.GenShinMapper;
+import simbot.example.Service.GenShinService;
 
 import javax.annotation.Resource;
+import java.util.List;
 
 
 /**
@@ -23,6 +31,14 @@ import javax.annotation.Resource;
 @Service
 @EnableTimeTask
 public class MyTast extends Constant {
+
+    @Autowired
+    GenShinService genShinService;
+
+    @Autowired
+    GenShinMapper genShinMapper;
+
+
     public NewsApi news = new NewsApi();
     static int i = 1;
 
@@ -36,6 +52,16 @@ public class MyTast extends Constant {
         Bot bot = manager.getBot("341677404");
         BotSender bs = bot.getSender();
         bs.SENDER.sendGroupMsg(g, msg);
+    }
+
+    private void sendPrivateMsg(String g, String msg) {
+        Bot bot = manager.getBot("341677404");
+        BotSender bs = bot.getSender();
+        // 判断bot是否为管理员
+        GroupMemberInfo groupMemberInfo = bs.GETTER.getMemberInfo("1019170385", g);
+        //groupMsg.
+        bs.SENDER.sendPrivateMsg(groupMemberInfo.getAccountCode(), msg);
+        //bs.SENDER.sendPrivateMsg(g, msg);
     }
 
     /**
@@ -73,7 +99,7 @@ public class MyTast extends Constant {
     }
 
     //@Fixed(value = 30, timeUnit = TimeUnit.SECONDS)
-    public void BLive() {
+    public void bLive() {
         Bot bot = manager.getBot("341677404");
         BotSender botSender = bot.getSender();
         if ("false".equals(BLIVESTATE)) {
@@ -84,37 +110,37 @@ public class MyTast extends Constant {
         }
     }
 
-    @Cron(value = "0 15 00 * * ? *")
+    /**
+     * 原神定时签到
+     */
+    @Cron(value = "00 25 15 * * ? *")
     public void genShinSign() {
+        // 构造搜索条件，搜索未删除的cookie
+        QueryWrapper<GenShinUser> queryWrapper = Wrappers.query();
+        queryWrapper.like("deletes", 0);
 
+        List<GenShinUser> genShinUsers1 = genShinMapper.selectList(queryWrapper);
+
+        // 签到类
         GenShinSign genShinSign = new GenShinSign();
-        genShinSign.doSign();
-        sendGroupMsg("140469072", "已进行米游社签到");
+
+        CatCodeUtil util = CatCodeUtil.INSTANCE;
+        // 取出list中的数据依次进行签到
+        for (GenShinUser genShinUser : genShinUsers1) {
+
+            // 执行签到,同时对当前数据进行初始化
+            if (genShinSign.doSign(genShinService.selectUid(genShinUser.getUid()))) {
+
+                if (GenShinSign.push == 1) {
+                    // @的人
+                    String atPeople = "[CAT:at,code=" + genShinUser.getQqid() + "]";
+                    sendGroupMsg("1019170385", atPeople + GenShinSign.getMessage());
+                }
+                genShinSign.signList(genShinUser.getUid());
+
+                sendGroupMsg("140469072", GenShinSign.getItemMsg() + "\n" + util.toCat("image", true, "file=" + GenShinSign.getItemImg()));
+            }
+            sendGroupMsg("140469072", genShinUser.getNickname() + ":" + GenShinSign.getMessage());
+        }
     }
-
-
-/**
- // 构建新闻定时器
- @Fixed(value = 30, timeUnit = TimeUnit.MINUTES)
- public void NewsApi() {
- Bot bot = manager.getBot("341677404");
- BotSender botSender = bot.getSender();
- CatCodeUtil util = CatCodeUtil.INSTANCE;
- int count = 0;
- while (i < news.length()) {
- i++;
- String msg = util.toCat("image", true, "file=" + news.image(i));
-
- botSender.SENDER.sendGroupMsg("1043409458", news.news(i) + "\n" + msg + news.URL(i));
- // botSender.SENDER.sendGroupMsg("1019170385", news.news(i) + "\n" + msg + news.URL(i));
-
- count += 1;
-
- if (count >= 3) {
- break;
- }
-
- }
- }*/
-
 }
