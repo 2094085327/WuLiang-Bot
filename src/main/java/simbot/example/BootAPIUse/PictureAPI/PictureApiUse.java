@@ -3,6 +3,7 @@ package simbot.example.BootAPIUse.PictureAPI;
 import catcode.CatCodeUtil;
 import love.forte.simbot.annotation.Filter;
 import love.forte.simbot.annotation.OnGroup;
+import love.forte.simbot.api.message.containers.AccountInfo;
 import love.forte.simbot.api.message.containers.GroupInfo;
 import love.forte.simbot.api.message.events.GroupMsg;
 import love.forte.simbot.api.message.events.MessageGet;
@@ -10,11 +11,12 @@ import love.forte.simbot.api.sender.MsgSender;
 import love.forte.simbot.api.sender.Sender;
 import love.forte.simbot.api.sender.Setter;
 import love.forte.simbot.filter.MatchType;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import simbot.example.BootAPIUse.API;
+import simbot.example.Service.BlackListService;
 import simbot.example.core.common.Constant;
 import simbot.example.core.common.TimeTranslate;
-import simbot.example.BootAPIUse.API;
-
 
 import java.util.Arrays;
 import java.util.concurrent.ExecutorService;
@@ -31,6 +33,8 @@ import java.util.concurrent.TimeUnit;
 @Service
 public class PictureApiUse extends Constant {
 
+    @Autowired
+    BlackListService blackListService;
 
     /**
      * 线程池
@@ -64,6 +68,7 @@ public class PictureApiUse extends Constant {
         Setter setter = msgSender.SETTER;
 
         GroupInfo groupInfo = groupMsg.getGroupInfo();
+        AccountInfo accountInfo = groupMsg.getAccountInfo();
 
         int groupBanId = (int) Arrays.stream(groupBanIdList).filter(groupInfo.getGroupCode()::contains).count();
 
@@ -81,7 +86,7 @@ public class PictureApiUse extends Constant {
 
 
         // 将群号为“637384877”的群排除在人工智能答复模块外
-        if (groupBanId != 1) {
+        if (groupBanId != 1 && blackListService.selectCode(accountInfo.getAccountCode()) == null) {
             try {
 
                 String img = util.toCat("image", true, "file=" + url);
@@ -145,16 +150,22 @@ public class PictureApiUse extends Constant {
     @OnGroup
     @Filter(value = "看看动漫", matchType = MatchType.REGEX_MATCHES, trim = true)
     public void picture2(GroupMsg groupMsg, MsgSender msgSender) {
+
         Setter setter = msgSender.SETTER;
+
         CatCodeUtil util = CatCodeUtil.INSTANCE;
         String msg = util.toCat("image", true, "file="
                 + "https://www.dmoe.cc/random.php");
+
         Sender sender = msgSender.SENDER;
+
         GroupInfo groupInfo = groupMsg.getGroupInfo();
+        AccountInfo accountInfo = groupMsg.getAccountInfo();
+
         int groupBanId = (int) Arrays.stream(groupBanIdList).filter(groupInfo.getGroupCode()::contains).count();
         try {
             // 将群号为“637384877”的群排除在人工智能答复模块外
-            if (groupBanId != 1) {
+            if (groupBanId != 1 && blackListService.selectCode(accountInfo.getAccountCode()) == null) {
 
                 // 消息标记
                 MessageGet.MessageFlag<? extends MessageGet.MessageFlagContent>
@@ -197,19 +208,22 @@ public class PictureApiUse extends Constant {
     @OnGroup
     @Filter(value = "来点原神", matchType = MatchType.REGEX_MATCHES, trim = true)
     public void yuanShen(GroupMsg groupMsg, MsgSender msgSender) {
+
         CatCodeUtil util = CatCodeUtil.INSTANCE;
         String msg = util.toCat("image", true, "file="
                 + "https://api.dujin.org/pic/yuanshen/");
 
         Sender sender = msgSender.SENDER;
         Setter setter = msgSender.SETTER;
+
         GroupInfo groupInfo = groupMsg.getGroupInfo();
+        AccountInfo accountInfo = groupMsg.getAccountInfo();
 
         int groupBanId = (int) Arrays.stream(groupBanIdList).filter(groupInfo.getGroupCode()::contains).count();
 
         try {
             // 将群号为“637384877”的群排除在人工智能答复模块外
-            if (groupBanId != 1) {
+            if (groupBanId != 1 && blackListService.selectCode(accountInfo.getAccountCode()) == null) {
 
                 // 消息标记
                 MessageGet.MessageFlag<? extends MessageGet.MessageFlagContent>

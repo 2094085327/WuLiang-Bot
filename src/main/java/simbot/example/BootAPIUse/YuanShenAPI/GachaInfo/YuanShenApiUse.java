@@ -4,6 +4,7 @@ import love.forte.simbot.annotation.Filter;
 import love.forte.simbot.annotation.OnGroup;
 import love.forte.simbot.api.message.MessageContentBuilder;
 import love.forte.simbot.api.message.MessageContentBuilderFactory;
+import love.forte.simbot.api.message.containers.AccountInfo;
 import love.forte.simbot.api.message.containers.GroupInfo;
 import love.forte.simbot.api.message.events.GroupMsg;
 import love.forte.simbot.api.sender.MsgSender;
@@ -11,6 +12,7 @@ import love.forte.simbot.filter.MatchType;
 import net.coobird.thumbnailator.Thumbnails;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import simbot.example.Service.BlackListService;
 import simbot.example.core.common.Constant;
 
 import java.io.File;
@@ -32,14 +34,19 @@ public class YuanShenApiUse extends Constant {
     @Autowired
     MessageContentBuilderFactory messageContentBuilderFactory;
 
+    @Autowired
+    BlackListService blackListService;
+
 
     @OnGroup
     @Filter(value = "原神抽卡分析", matchType = MatchType.CONTAINS, trim = true)
     public void gaChaLog(GroupMsg groupMsg, MsgSender msgSender) throws Exception {
 
         GroupInfo groupInfo = groupMsg.getGroupInfo();
+        AccountInfo accountInfo = groupMsg.getAccountInfo();
+
         int groupBanId = (int) Arrays.stream(groupBanIdList).filter(groupInfo.getGroupCode()::contains).count();
-        if (groupBanId != 1) {
+        if (groupBanId != 1 && blackListService.selectCode(accountInfo.getAccountCode()) == null) {
 
             String url = YuanApi.toUrl(groupMsg.getMsg());
             String urlCheckType = YuanApi.checkApi(url);
@@ -48,7 +55,6 @@ public class YuanShenApiUse extends Constant {
                 msgSender.SENDER.sendGroupMsg(groupMsg, urlCheckType);
             } else {
                 msgSender.SENDER.sendGroupMsg(groupMsg, "请耐心等待，正在分析中,大致需要30秒至一分钟(视抽卡数决定)");
-
 
                 YuanApi.getGachaRoleInfo(url);
                 msgSender.SENDER.sendGroupMsg(groupMsg, "--角色池分析完成--");

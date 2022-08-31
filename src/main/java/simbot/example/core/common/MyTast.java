@@ -113,7 +113,7 @@ public class MyTast extends Constant {
     /**
      * 原神定时签到
      */
-    @Cron(value = "00 25 15 * * ? *")
+    @Cron(value = "00 01 00 * * ? *")
     public void genShinSign() {
         // 构造搜索条件，搜索未删除的cookie
         QueryWrapper<GenShinUser> queryWrapper = Wrappers.query();

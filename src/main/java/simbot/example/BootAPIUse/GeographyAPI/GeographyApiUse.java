@@ -4,15 +4,17 @@ import love.forte.simbot.annotation.Filter;
 import love.forte.simbot.annotation.FilterValue;
 import love.forte.simbot.annotation.OnGroup;
 import love.forte.simbot.annotation.OnPrivate;
+import love.forte.simbot.api.message.containers.AccountInfo;
 import love.forte.simbot.api.message.containers.GroupInfo;
 import love.forte.simbot.api.message.events.GroupMsg;
 import love.forte.simbot.api.message.events.PrivateMsg;
 import love.forte.simbot.api.sender.MsgSender;
 import love.forte.simbot.api.sender.Sender;
 import love.forte.simbot.filter.MatchType;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import simbot.example.Service.BlackListService;
 import simbot.example.core.common.Constant;
-
 
 import java.util.Arrays;
 
@@ -23,6 +25,9 @@ import java.util.Arrays;
  */
 @Service
 public class GeographyApiUse extends Constant {
+
+    @Autowired
+    BlackListService blackListService;
 
     /**
      * 调用GeoAPI中的方法
@@ -41,10 +46,13 @@ public class GeographyApiUse extends Constant {
     @Filter(value = "{{city}}天气", matchType = MatchType.REGEX_MATCHES, trim = true)
     @Filter(value = "/tq{{city}}", matchType = MatchType.REGEX_MATCHES, trim = true)
     public void weather(GroupMsg groupMsg, MsgSender msgSender, @FilterValue("city") String city) {
+
         Sender sender = msgSender.SENDER;
         GroupInfo groupInfo = groupMsg.getGroupInfo();
+        AccountInfo accountInfo = groupMsg.getAccountInfo();
+
         int groupBanId = (int) Arrays.stream(groupBanIdList).filter(groupInfo.getGroupCode()::contains).count();
-        if (BOOTSTATE && groupBanId != 1) {
+        if (BOOTSTATE && groupBanId != 1 && blackListService.selectCode(accountInfo.getAccountCode()) == null) {
 
             // 将群号为“637384877”的群排除在人工智能答复模块外.
             if (!groupInfo.getGroupCode().equals(GROUPID3)) {
@@ -76,15 +84,21 @@ public class GeographyApiUse extends Constant {
 
         Sender sender = msgSender.SENDER;
 
-        if (city == null) {
-            sender.sendPrivateMsg(privateMsg, "天气查询失败哦~ 请输入正确的城市~");
-        } else {
-            sender.sendPrivateMsg(privateMsg, geoApi.weatherInfo(city));
-            geoApi.adm1 = null;
-            geoApi.adm2 = null;
-            geoApi.id = null;
-        }
+        AccountInfo accountInfo = privateMsg.getAccountInfo();
 
+
+        if (BOOTSTATE && blackListService.selectCode(accountInfo.getAccountCode()) == null) {
+
+            if (city == null) {
+                sender.sendPrivateMsg(privateMsg, "天气查询失败哦~ 请输入正确的城市~");
+            } else {
+                sender.sendPrivateMsg(privateMsg, geoApi.weatherInfo(city));
+                geoApi.adm1 = null;
+                geoApi.adm2 = null;
+                geoApi.id = null;
+            }
+
+        }
     }
 
     /**
@@ -103,9 +117,11 @@ public class GeographyApiUse extends Constant {
         Sender sender = msgSender.SENDER;
 
         GroupInfo groupInfo = groupMsg.getGroupInfo();
+        AccountInfo accountInfo = groupMsg.getAccountInfo();
+
         int groupBanId = (int) Arrays.stream(groupBanIdList).filter(groupInfo.getGroupCode()::contains).count();
         // 将群号为“637384877”的群排除在人工智能答复模块外
-        if (groupBanId != 1) {
+        if (BOOTSTATE && groupBanId != 1 && blackListService.selectCode(accountInfo.getAccountCode()) == null) {
             if (city == null) {
                 sender.sendGroupMsg(groupMsg, "城市查询失败哦~ 请输入正确的城市~");
             } else {
@@ -132,14 +148,19 @@ public class GeographyApiUse extends Constant {
 
         Sender sender = msgSender.SENDER;
 
-        if (city == null) {
-            sender.sendPrivateMsg(privateMsg, "城市查询失败哦~ 请输入正确的城市~");
-        } else {
-            sender.sendPrivateMsg(privateMsg, geoApi.CityInfo(city));
-            geoApi.adm1 = null;
-            geoApi.adm2 = null;
-            geoApi.id = null;
+        AccountInfo accountInfo = privateMsg.getAccountInfo();
+
+        // 将群号为“637384877”的群排除在人工智能答复模块外
+        if (BOOTSTATE && blackListService.selectCode(accountInfo.getAccountCode()) == null) {
+
+            if (city == null) {
+                sender.sendPrivateMsg(privateMsg, "城市查询失败哦~ 请输入正确的城市~");
+            } else {
+                sender.sendPrivateMsg(privateMsg, geoApi.CityInfo(city));
+                geoApi.adm1 = null;
+                geoApi.adm2 = null;
+                geoApi.id = null;
+            }
         }
     }
-
 }

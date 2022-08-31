@@ -15,8 +15,10 @@ import love.forte.simbot.api.sender.Sender;
 import love.forte.simbot.api.sender.Setter;
 import love.forte.simbot.bot.BotManager;
 import love.forte.simbot.filter.MatchType;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import simbot.example.BootAPIUse.API;
+import simbot.example.Service.BlackListService;
 import simbot.example.Util.CatUtil;
 import simbot.example.core.common.Constant;
 import simbot.example.core.common.PeopleChangeWrite;
@@ -38,12 +40,8 @@ import java.util.concurrent.TimeUnit;
 @Service
 public class GroupListener extends Constant {
 
-    /**
-     * 构建机器人管理器
-     */
-    @Depend
-    private BotManager manager;
-
+    @Autowired
+    BlackListService blackListService;
 
     public static ExecutorService THREAD_POOL;
 
@@ -83,52 +81,55 @@ public class GroupListener extends Constant {
         // 获取群号
         String groupId = groupInfo.getGroupCode();
         // 根据不同群号向不同人发送消息
-        switch (groupId) {
-            case "1019170385":
-                if (USERID1.equals(personId)) {
+
+        if (blackListService.selectCode(personId) == null) {
+            switch (groupId) {
+                case "1019170385":
+                    if (USERID1.equals(personId)) {
+                        break;
+                    }
+
+                case "140469072":
+                    if (USERID1.equals(personId)) {
+                        break;
+                    }
+
+                case "1043409458":
+                    if (SENTENCE1.equals(groupMsg.getMsg()) ||
+                            SENTENCE5.equals(groupMsg.getMsg())) {
+                        sender.sendGroupMsg(groupMsg, "无量姬还会看好康的");
+                        sender.sendGroupMsg(groupMsg, "来点好康的");
+                    }
+                    if (SENTENCE2.equals(groupMsg.getMsg())) {
+                        sender.sendGroupMsg(groupMsg, "除了复读，无量姬还会看好康的");
+                        sender.sendGroupMsg(groupMsg, "来点好康的");
+                    }
+                    if (SENTENCE3.equals(groupMsg.getMsg()) ||
+                            "我好难过，居然和一群只会复读的机器人呆在一起，呜呜呜~~~~~".equals(groupMsg.getMsg())) {
+                        sender.sendGroupMsg(groupMsg, "那就和涩图在一起吧！");
+                        sender.sendGroupMsg(groupMsg, "来点好康的");
+                    }
+                    if (SENTENCE4.equals(groupMsg.getMsg())) {
+                        sender.sendGroupMsg(groupMsg, "就是说，肯定是涩图看少了，所以...");
+                        sender.sendGroupMsg(groupMsg, "来点好康的");
+                    }
                     break;
-                }
+                default:
 
-            case "140469072":
-                if (USERID1.equals(personId)) {
-                    break;
-                }
+            }
+            // 获取时间
+            String format1 = time.tt();
 
-            case "1043409458":
-                if (SENTENCE1.equals(groupMsg.getMsg()) ||
-                        SENTENCE5.equals(groupMsg.getMsg())) {
-                    sender.sendGroupMsg(groupMsg, "无量姬还会看好康的");
-                    sender.sendGroupMsg(groupMsg, "来点好康的");
-                }
-                if (SENTENCE2.equals(groupMsg.getMsg())) {
-                    sender.sendGroupMsg(groupMsg, "除了复读，无量姬还会看好康的");
-                    sender.sendGroupMsg(groupMsg, "来点好康的");
-                }
-                if (SENTENCE3.equals(groupMsg.getMsg()) ||
-                        "我好难过，居然和一群只会复读的机器人呆在一起，呜呜呜~~~~~".equals(groupMsg.getMsg())) {
-                    sender.sendGroupMsg(groupMsg, "那就和涩图在一起吧！");
-                    sender.sendGroupMsg(groupMsg, "来点好康的");
-                }
-                if (SENTENCE4.equals(groupMsg.getMsg())) {
-                    sender.sendGroupMsg(groupMsg, "就是说，肯定是涩图看少了，所以...");
-                    sender.sendGroupMsg(groupMsg, "来点好康的");
-                }
-                break;
-            default:
+            // 在控制台输出信息
+            String groupMsgPutOut = "[" + format1 + "]" + "用户[" + accountInfo.getAccountNickname() + "/"
+                    + accountInfo.getAccountCode() + "]在群[" + groupInfo.getGroupCode()
+                    + "][" + groupInfo.getGroupName() + "]发送了信息：" + groupMsg.getMsg();
+            System.out.println(groupMsgPutOut);
 
+            // 将信息存入日志
+            Writing writing = new Writing();
+            writing.write(groupMsgPutOut + "\n");
         }
-        // 获取时间
-        String format1 = time.tt();
-
-        // 在控制台输出信息
-        String groupMsgPutOut = "[" + format1 + "]" + "用户[" + accountInfo.getAccountNickname() + "/"
-                + accountInfo.getAccountCode() + "]在群[" + groupInfo.getGroupCode()
-                + "][" + groupInfo.getGroupName() + "]发送了信息：" + groupMsg.getMsg();
-        System.out.println(groupMsgPutOut);
-
-        // 将信息存入日志
-        Writing writing = new Writing();
-        writing.write(groupMsgPutOut + "\n");
     }
 
     /**
@@ -143,8 +144,10 @@ public class GroupListener extends Constant {
     public void help(GroupMsg groupMsg, MsgSender msgSender) {
 
         GroupInfo groupInfo = groupMsg.getGroupInfo();
+        AccountInfo accountInfo = groupMsg.getAccountInfo();
+
         int groupBanId = (int) Arrays.stream(groupBanIdList).filter(groupInfo.getGroupCode()::contains).count();
-        if (groupBanId != 1) {
+        if (groupBanId != 1 && blackListService.selectCode(accountInfo.getAccountCode()) == null && BOOTSTATE) {
             msgSender.SENDER.sendGroupMsg(groupMsg, Constant.HELPS);
         }
     }
@@ -164,7 +167,7 @@ public class GroupListener extends Constant {
         int groupBanId = (int) Arrays.stream(groupBanIdList).filter(groupInfo.getGroupCode()::contains).count();
 
         String setUser = accountInfo.getAccountCode();
-        if (groupBanId != 1) {
+        if (groupBanId != 1 && blackListService.selectCode(accountInfo.getAccountCode()) == null) {
             if (setUser.equals(USERID1)) {
                 BOOTSTATE = false;
                 System.out.println("已关机");
@@ -189,7 +192,7 @@ public class GroupListener extends Constant {
         GroupInfo groupInfo = groupMsg.getGroupInfo();
         String setUser = accountInfo.getAccountCode();
         int groupBanId = (int) Arrays.stream(groupBanIdList).filter(groupInfo.getGroupCode()::contains).count();
-        if (groupBanId != 1) {
+        if (groupBanId != 1 && blackListService.selectCode(accountInfo.getAccountCode()) == null) {
             if (setUser.equals(USERID1)) {
                 BOOTSTATE = true;
                 System.out.println("已开机");
@@ -209,8 +212,8 @@ public class GroupListener extends Constant {
      * @param msgSender 用于在群聊中发送消息
      */
     @OnGroup
-    @Filter(value = "请求@全体成员", matchType = MatchType.REGEX_MATCHES, trim = true)
-    public void atAll(GroupMsg groupMsg, MsgSender msgSender) {
+    @Filter(value = "请求@全体成员 *{{msg}}", matchType = MatchType.REGEX_MATCHES, trim = true)
+    public void atAll(GroupMsg groupMsg, MsgSender msgSender, @FilterValue("msg") String msg) {
         Sender sender = msgSender.SENDER;
 
         AccountInfo accountInfo = groupMsg.getAccountInfo();
@@ -224,10 +227,10 @@ public class GroupListener extends Constant {
 
         // @的人
         String atPeople = "[CAT:at,code=" + accountInfo.getAccountCode() + "]";
-        if (groupBanId != 1) {
+        if (groupBanId != 1 && blackListService.selectCode(accountInfo.getAccountCode()) == null && BOOTSTATE) {
             if (groupMemberInfo.getPermission().isAdmin() || groupMemberInfo.getPermission().isOwner()) {
                 if (USERID1.equals(accountInfo.getAccountCode())) {
-                    sender.sendGroupMsg(groupId, cat1);
+                    sender.sendGroupMsg(groupId, cat1+groupMsg.getMsg());
                 } else {
                     sender.sendGroupMsg(groupMsg, atPeople + "你没有权限@全体成员哦");
                 }
@@ -266,7 +269,7 @@ public class GroupListener extends Constant {
         // @的人
         String atPeople = "[CAT:at,code=" + accountInfo.getAccountCode() + "]";
 
-        if (groupBanId != 1) {
+        if (groupBanId != 1 && blackListService.selectCode(accountInfo.getAccountCode()) == null && BOOTSTATE) {
             if (groupMemberInfo.getPermission().isAdmin() || groupMemberInfo.getPermission().isOwner()) {
                 if (USERID1.equals(accountInfo.getAccountCode())) {
 
@@ -311,7 +314,7 @@ public class GroupListener extends Constant {
         // @的人
         String atPeople = "[CAT:at,code=" + accountInfo.getAccountCode() + "]";
 
-        if (groupBanId != 1) {
+        if (groupBanId != 1 && blackListService.selectCode(accountInfo.getAccountCode()) == null && BOOTSTATE) {
             if (groupMemberInfo.getPermission().isAdmin() || groupMemberInfo.getPermission().isOwner()) {
                 if (USERID1.equals(accountInfo.getAccountCode())) {
 
@@ -343,7 +346,7 @@ public class GroupListener extends Constant {
         GroupInfo groupInfo = groupMsg.getGroupInfo();
         String setUser = accountInfo.getAccountCode();
         int groupBanId = (int) Arrays.stream(groupBanIdList).filter(groupInfo.getGroupCode()::contains).count();
-        if (groupBanId != 1) {
+        if (groupBanId != 1 && blackListService.selectCode(accountInfo.getAccountCode()) == null && BOOTSTATE) {
             if (setUser.equals(USERID1)) {
                 for (int i = 0; i < 20; i++) {
                     msgSender.SENDER.sendGroupMsg(groupMsg, "阿姬在！" + face2);
@@ -371,7 +374,6 @@ public class GroupListener extends Constant {
         //入群者信息
         AccountInfo accountInfo = groupAddRequest.getAccountInfo();
         GroupInfo groupInfo = groupMsg.getGroupInfo();
-
 
         // 获取时间
         String format1 = time.tt();
@@ -405,82 +407,86 @@ public class GroupListener extends Constant {
         AccountInfo accountInfo = groupMemberIncrease.getAccountInfo();
         GroupInfo groupInfo = groupMemberIncrease.getGroupInfo();
 
+        int groupBanId = (int) Arrays.stream(groupBanIdList).filter(groupInfo.getGroupCode()::contains).count();
 
-        Sender sender = msgSender.SENDER;
+        if (groupBanId != 1 && blackListService.selectCode(accountInfo.getAccountCode()) == null && BOOTSTATE) {
 
-        // 获取时间
-        String format1 = time.tt();
+            Sender sender = msgSender.SENDER;
 
-        // 将入群信息存入日志
-        PeopleChangeWrite peopleChangeWrite = new PeopleChangeWrite();
-        String msgs = "[" + format1 + "][" + accountInfo.getAccountCode() + "--" + accountInfo.getAccountNickname()
-                + "]加入群聊：[" + groupInfo.getGroupCode() + "/" + groupInfo.getGroupName() + "]\n";
-        peopleChangeWrite.writeIncrease(msgs);
-        if (groupInfo.getGroupCode().equals(GROUPID1) || groupInfo.getGroupCode().equals(GROUPID2) ||
-                groupInfo.getGroupCode().equals(GROUPID3)) {
-            msgSender.SENDER.sendPrivateMsg("2094085327", msgs);
+            // 获取时间
+            String format1 = time.tt();
+
+            // 将入群信息存入日志
+            PeopleChangeWrite peopleChangeWrite = new PeopleChangeWrite();
+            String msgs = "[" + format1 + "][" + accountInfo.getAccountCode() + "--" + accountInfo.getAccountNickname()
+                    + "]加入群聊：[" + groupInfo.getGroupCode() + "/" + groupInfo.getGroupName() + "]\n";
+            peopleChangeWrite.writeIncrease(msgs);
+            if (groupInfo.getGroupCode().equals(GROUPID1) || groupInfo.getGroupCode().equals(GROUPID2) ||
+                    groupInfo.getGroupCode().equals(GROUPID3)) {
+                msgSender.SENDER.sendPrivateMsg("2094085327", msgs);
+            }
+
+            // 线程池
+            if (groupInfo.getGroupCode().equals(GROUPID3)) {
+                THREAD_POOL = new ThreadPoolExecutor(50, 50, 3,
+                        TimeUnit.SECONDS, new LinkedBlockingQueue<>(50), r -> {
+                    Thread thread = new Thread(r);
+                    thread.setName(String.format("newThread%d", thread.getId()));
+                    return thread;
+                });
+
+                // 创建延时消息
+                THREAD_POOL.execute(() -> {
+                    try {
+                        // 线程休眠45秒
+                        Thread.sleep(45000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                });
+            }
+
+            if (groupInfo.getGroupCode().equals(GROUPID2)) {
+
+                MessageContent msg1 = builder
+                        // at当事人
+                        .at(accountInfo)
+                        // tips 通过 \n 换行
+                        .text(" 欢迎入群！")
+                        .build();
+                // 通过猫猫码发送表情
+                String cat2 = "[CAT:face,id=277]";
+                //消息
+                String msg2 = " 请看置顶消息！如果没有就当我没说";
+                //消息
+                String msg3 = "请及时修改昵称!";
+
+
+                // 发送消息
+                sender.sendGroupMsg(groupInfo, msg1);
+                sender.sendGroupMsg(groupInfo, msg2 + cat2);
+                sender.sendGroupMsg(groupInfo, msg3);
+            }
+
+            if (groupInfo.getGroupCode().equals(GROUPID5)) {
+
+                MessageContent msg = builder
+                        // at当事人
+                        .at(accountInfo)
+                        // tips 通过 \n 换行
+                        .text(" 欢迎加入!")
+                        .build();
+
+                // 发送消息
+                String msg2 = "新人爆照！";
+                sender.sendGroupMsg(groupInfo, msg);
+                sender.sendGroupMsg(groupInfo, msg2);
+
+            }
+            System.out.println("--[" + format1 + "][" + accountInfo.getAccountCode() + "--" + accountInfo.getAccountNickname()
+                    + "]加入群聊：[" + groupInfo.getGroupCode() + "/" + groupInfo.getGroupName() + "]--" + "\n");
+
         }
-
-        // 线程池
-        if (groupInfo.getGroupCode().equals(GROUPID3)) {
-            THREAD_POOL = new ThreadPoolExecutor(50, 50, 3,
-                    TimeUnit.SECONDS, new LinkedBlockingQueue<>(50), r -> {
-                Thread thread = new Thread(r);
-                thread.setName(String.format("newThread%d", thread.getId()));
-                return thread;
-            });
-
-            // 创建延时消息
-            THREAD_POOL.execute(() -> {
-                try {
-                    // 线程休眠45秒
-                    Thread.sleep(45000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            });
-        }
-
-        if (groupInfo.getGroupCode().equals(GROUPID2)) {
-
-            MessageContent msg1 = builder
-                    // at当事人
-                    .at(accountInfo)
-                    // tips 通过 \n 换行
-                    .text(" 欢迎入群！")
-                    .build();
-            // 通过猫猫码发送表情
-            String cat2 = "[CAT:face,id=277]";
-            //消息
-            String msg2 = " 请看置顶消息！如果没有就当我没说";
-            //消息
-            String msg3 = "请及时修改昵称!";
-
-
-            // 发送消息
-            sender.sendGroupMsg(groupInfo, msg1);
-            sender.sendGroupMsg(groupInfo, msg2 + cat2);
-            sender.sendGroupMsg(groupInfo, msg3);
-        }
-
-        if (groupInfo.getGroupCode().equals(GROUPID5)) {
-
-            MessageContent msg = builder
-                    // at当事人
-                    .at(accountInfo)
-                    // tips 通过 \n 换行
-                    .text(" 欢迎加入!")
-                    .build();
-
-            // 发送消息
-            String msg2 = "新人爆照！";
-            sender.sendGroupMsg(groupInfo, msg);
-            sender.sendGroupMsg(groupInfo, msg2);
-
-        }
-        System.out.println("--[" + format1 + "][" + accountInfo.getAccountCode() + "--" + accountInfo.getAccountNickname()
-                + "]加入群聊：[" + groupInfo.getGroupCode() + "/" + groupInfo.getGroupName() + "]--" + "\n");
-
     }
 
     /**
@@ -499,13 +505,13 @@ public class GroupListener extends Constant {
         // 判断退群方式和获取操作员
         // 主动退群
         if (groupMemberReduce.getReduceType().equals(GroupMemberReduce.Type.LEAVE)) {
-            msgSender.SENDER.sendPrivateMsg("2094085327", "[" + groupInfo.getGroupCode() + "-" + groupInfo.getGroupName() + "]["
+            msgSender.SENDER.sendPrivateMsg(USERID1, "[" + groupInfo.getGroupCode() + "-" + groupInfo.getGroupName() + "]["
                     + accountInfo.getAccountCode() + "-" + accountInfo.getAccountNickname() + "]是自愿退群的呢，走的" +
                     "很安详~");
         }
         // 被踢出群聊
         else {
-            msgSender.SENDER.sendPrivateMsg("2094085327", "[" + groupInfo.getGroupCode() + "-" + groupInfo.getGroupName()
+            msgSender.SENDER.sendPrivateMsg(USERID1, "[" + groupInfo.getGroupCode() + "-" + groupInfo.getGroupName()
                     + "][" + accountInfo.getAccountCode() + "-" + accountInfo.getAccountNickname() + "]是被["
                     + Objects.requireNonNull(groupMemberReduce.getOperatorInfo()).getOperatorCode() + "-"
                     + Objects.requireNonNull(groupMemberReduce.getOperatorInfo()).getOperatorRemarkOrNickname() + "]踢出群聊的呢，走的很不甘心~");

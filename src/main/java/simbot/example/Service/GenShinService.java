@@ -9,6 +9,8 @@ import simbot.example.BootAPIUse.YuanShenAPI.Sign.GenShinSign;
 import simbot.example.Enity.GenShinUser;
 import simbot.example.Mapper.GenShinMapper;
 
+import java.util.List;
+
 /**
  * @Author zeng
  * @Date 2022/8/26 11:01
@@ -99,6 +101,7 @@ public class GenShinService {
 
     /**
      * 改变推送状态
+     *
      * @param qqId 对应的QQ号
      */
     public void upDatePush(String qqId) {
@@ -112,7 +115,8 @@ public class GenShinService {
 
     /**
      * 删除cookie
-     * @param uid  待删除的cookie对应的uid
+     *
+     * @param uid 待删除的cookie对应的uid
      */
     public void pseudoDeletion(String uid) {
         genShinUser.setDeletes(1);
@@ -122,5 +126,31 @@ public class GenShinService {
 
         genShinMapper.update(genShinUser, queryWrapper);
 
+    }
+
+    public String showMyList(String qqid) {
+        QueryWrapper<GenShinUser> queryWrapper = Wrappers.query();
+        queryWrapper.like("qqid", qqid);
+
+        List<GenShinUser> blackListUsers = genShinMapper.selectList(queryWrapper);
+        System.out.println(blackListUsers);
+        StringBuilder msg = new StringBuilder("当前QQ号绑定的账户:\n");
+        for (GenShinUser genShinUser : blackListUsers) {
+            msg.append(genShinUser.getUid()).append(" ").append(genShinUser.getNickname()).append("\n");
+        }
+        return String.valueOf(msg);
+    }
+    public String showAllList() {
+
+        QueryWrapper<GenShinUser> queryWrapper = Wrappers.query();
+        queryWrapper.like("deletes", 0);
+
+        List<GenShinUser> blackListUsers = genShinMapper.selectList(queryWrapper);
+        System.out.println(blackListUsers);
+        StringBuilder msg = new StringBuilder("全部绑定的账户:\n");
+        for (GenShinUser genShinUser : blackListUsers) {
+            msg.append(genShinUser.getUid()).append(" ").append(genShinUser.getNickname()).append("\n");
+        }
+        return String.valueOf(msg);
     }
 }

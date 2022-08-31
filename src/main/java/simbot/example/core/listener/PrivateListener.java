@@ -11,7 +11,7 @@ import love.forte.simbot.api.sender.Sender;
 import love.forte.simbot.filter.MatchType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import simbot.example.BootAPIUse.MlyaiAPIUSR.MlyaiApi;
+import simbot.example.BootAPIUse.MlyaiAPI.MlyaiApi;
 import simbot.example.core.common.Constant;
 import simbot.example.core.common.TimeTranslate;
 import simbot.example.core.common.Writing;

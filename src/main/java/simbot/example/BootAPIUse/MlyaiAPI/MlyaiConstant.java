@@ -1,4 +1,4 @@
-package simbot.example.BootAPIUse.MlyaiAPIUSR;
+package simbot.example.BootAPIUse.MlyaiAPI;
 
 /**
  * @author zeng

@@ -1,4 +1,4 @@
-package simbot.example.BootAPIUse.MlyaiAPIUSR;
+package simbot.example.BootAPIUse.MlyaiAPI;
 
 import catcode.CatCodeUtil;
 import love.forte.simbot.annotation.Filter;
@@ -11,12 +11,13 @@ import love.forte.simbot.api.message.events.MessageGet;
 import love.forte.simbot.api.message.events.PrivateMsg;
 import love.forte.simbot.api.sender.MsgSender;
 import love.forte.simbot.api.sender.Sender;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import simbot.example.core.common.Constant;
 import simbot.example.BootAPIUse.API;
+import simbot.example.Service.BlackListService;
+import simbot.example.core.common.Constant;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -30,6 +31,8 @@ import java.util.concurrent.TimeUnit;
  */
 @Service
 public class MlyaiApiUse extends Constant {
+    @Autowired
+    BlackListService blackListService;
 
     final MlyaiApi mlyaiApi;
 
@@ -53,7 +56,8 @@ public class MlyaiApiUse extends Constant {
      */
     @OnGroup
     @Filter(atBot = true)
-    public void mlChat(GroupMsg groupMsg, MsgSender msgSender) throws IOException {
+    public void mlChat(GroupMsg groupMsg, MsgSender msgSender) {
+
         GroupInfo groupInfo = groupMsg.getGroupInfo();
         AccountInfo accountInfo = groupMsg.getAccountInfo();
 
@@ -71,7 +75,7 @@ public class MlyaiApiUse extends Constant {
         // 当输入的msg通过contains匹配到相应指令时listSize值为1，无相应指令时为0，在无指令时调用API
         if (listSize != 1) {
             // 将在BAN列表中的群排除在人工智能答复模块外
-            if (groupBanId != 1 && BOOTSTATE) {
+            if (groupBanId != 1 && BOOTSTATE && blackListService.selectCode(accountInfo.getAccountCode()) == null) {
                 msgSender.SENDER.sendGroupMsg(groupMsg, mlyaiApi.chat(content, id, fromName, 2, groupId, groupName));
                 System.out.println(content);
                 /*  CatCodeUtil util = CatCodeUtil.INSTANCE;
@@ -79,8 +83,8 @@ public class MlyaiApiUse extends Constant {
                  String voice = util.toCat("voice", true, "file="
                  + api.record(reMsg));
                  sender.sendGroupMsg(groupMsg, voice);*/
-            }
 
+            }
             // 当被Bot在被屏蔽的群组中被@时将消息转发至User
             if (groupBanId == 1) {
 
@@ -89,7 +93,6 @@ public class MlyaiApiUse extends Constant {
                         + groupInfo.getGroupCode() + "-" + groupInfo.getGroupName() + "]@Bot");
                 msgSender.SENDER.sendPrivateMsg(USERID1, "消息内容为:" + groupMsg.getMsg());
             }
-
         }
     }
 
@@ -117,7 +120,7 @@ public class MlyaiApiUse extends Constant {
         // 将数组通过流的形式遍历并计数有效的指令个数
         int listSize = (int) Arrays.stream(list).filter(msgs::contains).count();
 
-        if (BOOTSTATE && listSize != 1) {
+        if (BOOTSTATE && listSize != 1 && blackListService.selectCode(accountInfo.getAccountCode()) == null) {
 
             //检测到特定私信内容进行特定回复
             if ("hi".equals(privateMsg.getMsg()) || "你好".equals(privateMsg.getMsg())) {

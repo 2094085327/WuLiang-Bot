@@ -1,4 +1,4 @@
-package simbot.example.BootAPIUse.MlyaiAPIUSR;
+package simbot.example.BootAPIUse.MlyaiAPI;
 
 import cn.hutool.http.HttpUtil;
 import com.alibaba.fastjson.JSON;
