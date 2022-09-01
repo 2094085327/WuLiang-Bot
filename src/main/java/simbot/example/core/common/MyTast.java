@@ -135,6 +135,8 @@ public class MyTast extends Constant {
                     // @的人
                     String atPeople = "[CAT:at,code=" + genShinUser.getQqid() + "]";
                     sendGroupMsg("1019170385", atPeople + GenShinSign.getMessage());
+
+                    sendGroupMsg("140469072", GenShinSign.getItemMsg() + "\n" + util.toCat("image", true, "file=" + GenShinSign.getItemImg()));
                 }
                 genShinSign.signList(genShinUser.getUid());
 

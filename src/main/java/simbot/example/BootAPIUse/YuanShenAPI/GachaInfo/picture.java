@@ -531,7 +531,7 @@ public class picture {
         BufferedImage permanentPool = ImageIO.read(new File("yuanImage/permanent pool.png").getAbsoluteFile());
 
 
-        ImageIcon sec = new ImageIcon(new File("yuanImage/sec3.png").getAbsolutePath());
+        ImageIcon sec = new ImageIcon(new File("yuanImage/sec.png").getAbsolutePath());
 
         BufferedImage bi = new BufferedImage(3305, 500 + allData.getHeight() + rolePool.getHeight() + armsPool.getHeight() + permanentPool.getHeight(), BufferedImage.TYPE_INT_ARGB);
 
@@ -541,37 +541,22 @@ public class picture {
         g2d.addRenderingHints(new RenderingHints(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY));
 
         g2d.drawImage(sec.getImage(), 0, 0, 3305, 500 + allData.getHeight() + rolePool.getHeight() + armsPool.getHeight() + permanentPool.getHeight(), null);
-        g2d.dispose();
-        ImageIO.write(bi, "png", new File("yuanImage/sec1.png").getAbsoluteFile());
-
-        /*
-         * 增加1秒延迟..避免在服务器中由于服务器性能太差导致的图片IO流异常
-         * 后期可能可以优化
-         */
-        Robot r = new Robot();
-        r.delay(1000);
-
-        //读取总数据图片
-        BufferedImage backImg = ImageIO.read(new File("yuanImage/sec1.png").getAbsoluteFile());
-
-        //用a创建绘画对象
-        Graphics2D gd = backImg.createGraphics();
 
         //把总数据画上去
-        gd.drawImage(allData, 100, 100, allData.getWidth(), allData.getHeight(), null);
+        g2d.drawImage(allData, 100, 100, allData.getWidth(), allData.getHeight(), null);
         //把角色池画上去
-        gd.drawImage(rolePool, 100, 1242, rolePool.getWidth(), rolePool.getHeight(), null);
+        g2d.drawImage(rolePool, 100, 1242, rolePool.getWidth(), rolePool.getHeight(), null);
 
         //把武器池画上去
-        gd.drawImage(armsPool, 100, 1342 + rolePool.getHeight(), armsPool.getWidth(), armsPool.getHeight(), null);
+        g2d.drawImage(armsPool, 100, 1342 + rolePool.getHeight(), armsPool.getWidth(), armsPool.getHeight(), null);
 
         //把常驻池画上去
-        gd.drawImage(permanentPool, 100, 1442 + rolePool.getHeight() + armsPool.getHeight(), permanentPool.getWidth(), permanentPool.getHeight(), null);
+        g2d.drawImage(permanentPool, 100, 1442 + rolePool.getHeight() + armsPool.getHeight(), permanentPool.getWidth(), permanentPool.getHeight(), null);
 
-        gd.dispose();
+        g2d.dispose();
 
         //保存新图片.getAbsoluteFile()
-        ImageIO.write(backImg, "png", new File("yuanImage/finally.png").getAbsoluteFile());
+        ImageIO.write(bi, "png", new File("yuanImage/finally.png").getAbsoluteFile());
     }
 
 
