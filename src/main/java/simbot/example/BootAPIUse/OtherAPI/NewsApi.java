@@ -4,72 +4,55 @@ import cn.hutool.http.HttpUtil;
 import net.sf.json.JSONObject;
 import org.json.JSONArray;
 
-import java.util.Objects;
-
 /**
  * @author zeng
  * @date 2022/6/27 15:21
  * @user 86188
  */
+@SuppressWarnings("")
 public class NewsApi {
+    private  StringBuilder newsMsg;
+
+    public  StringBuilder getNewsMsg() {
+        news();
+        return newsMsg;
+    }
 
     /**
      * 新闻API
      */
-    public String url = "https://c.m.163.com/nc/article/headline/T1348647853363/0-40.html";
-    public String jsonStr = HttpUtil.get(url);
-    public JSONObject object = JSONObject.fromObject(jsonStr);
+    public  void news() {
+        String newsUrl = "https://v.api.aa1.cn/api/topbaidu/index.php";
+        String jsonStr = HttpUtil.get(newsUrl);
 
-    /**
-     * 获得名为"T1348647853363"的String
-     */
-    public String T1348647853363 = object.getString("T1348647853363");
+        // 去除反爬措施
+        jsonStr = jsonStr.substring(0, jsonStr.length() - 4);
+        JSONObject object = JSONObject.fromObject(jsonStr);
 
-    /**
-     * 获取新闻标题，时间，内容
-     * @param index 下标
-     * @return 返回新闻
-     */
-    public String news(int index) {
-        JSONArray jsonArray;
-        jsonArray = new JSONArray(T1348647853363);
+        try {
+            String code = object.getString("code");
+            String codeState = "200";
+            if (code.equals(codeState)) {
+                String newsList = object.getString("newslist");
 
-        return jsonArray.getJSONObject(index).getString("title") + "\n"
-                + jsonArray.getJSONObject(index).getString("lmodify") + "\n"
-                + jsonArray.getJSONObject(index).getString("digest")+"...";
-    }
+                JSONArray jsonArray = new JSONArray(newsList);
 
-    /**
-     * 获取新闻图片地址
-     * @param index 下标
-     * @return 获取新闻图片地址
-     */
-    public String image(int index) {
-        JSONArray jsonArray;
-        jsonArray = new JSONArray(T1348647853363);
-
-        return jsonArray.getJSONObject(index).getString("imgsrc");
-    }
-
-    // 获取新闻数组长度
-    public int length() {
-        JSONArray jsonArray;
-         jsonArray = new JSONArray(T1348647853363);
-        return jsonArray.length();
-    }
-
-    // 获取新闻网址
-    public String URL(int index) {
-        JSONArray jsonArray;
-        jsonArray = new JSONArray(T1348647853363);
-
-        if (!Objects.equals(jsonArray.getJSONObject(index).getString("url"), "")) {
-
-            return "\n网址：" + jsonArray.getJSONObject(index).getString("url");
+                newsMsg = new StringBuilder("今日头条:\n");
+                int arrayLength = 10;
+                for (int length = 0; length < arrayLength; length++) {
+                    newsMsg.append(length + 1).append(".").append(jsonArray.getJSONObject(length).getString("title")).append("\n");
+                }
+                newsMsg.append("--------------------------");
+            }
+        } catch (Exception e) {
+            newsMsg = new StringBuilder("诶呀新闻没了");
         }
 
-        // 当新闻网址为空或不存在url字段时返回
-        return "";
     }
 
+
+//    public static void main(String[] args) {
+//        news();
+//        System.out.println(getNewsMsg());
+//    }
 }

@@ -38,7 +38,7 @@ public class HeaderBuilder {
 
     public static Header[] getBasicHeaders() {
         return new HeaderBuilder.Builder().add("Cookie", CookieStore.cookie)
-                .add("User-Agent", String.format("Mozilla/5.0 (iPhone; CPU iPhone OS 14_0_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) miHoYoBBS/%s", "2.35.2"))
+                .add("User-Agent", String.format("Mozilla/5.0 (iPhone; CPU iPhone OS 14_0_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) miHoYoBBS/%s", SignConstant.APP_VERSION))
                 .add("Referer", SignConstant.REFERER_URL)
                 .add("Accept-Encoding", "gzip, deflate, br")
                 .add("x-rpc-channel", "appstore")
@@ -54,7 +54,7 @@ public class HeaderBuilder {
                 .add("Content-Type", "application/json;charset=UTF-8")
                 .add("x-rpc-client_type", "2")
                 .add("x-rpc-app_version", "2.34.1")
-                .add("DS",HeaderParams.getDS())
+                .add("DS",HeaderParams.getDs())
                 .addAll(getBasicHeaders()).build();
     }
 

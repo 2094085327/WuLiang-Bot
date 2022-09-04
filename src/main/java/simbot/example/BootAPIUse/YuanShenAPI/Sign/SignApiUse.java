@@ -31,10 +31,14 @@ public class SignApiUse extends Constant {
     /**
      * 自动装配service
      */
-    @Autowired
      GenShinService genShinService;
-    @Autowired
     BlackListService blackListService;
+
+    @Autowired
+    public SignApiUse(GenShinService genShinService, BlackListService blackListService) {
+        this.genShinService = genShinService;
+        this.blackListService = blackListService;
+    }
 
     public GenShinSign sign = new GenShinSign();
 
@@ -63,7 +67,6 @@ public class SignApiUse extends Constant {
         if (blackListService.selectCode(nowQqId) == null && BOOTSTATE) {
             if (noInfo(uid)) {
                 // 获取QQ号
-
 
                 // 初始化签到用户
                 genShinService.selectUid(uid);

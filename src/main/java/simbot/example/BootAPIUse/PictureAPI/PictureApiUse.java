@@ -13,7 +13,7 @@ import love.forte.simbot.api.sender.Setter;
 import love.forte.simbot.filter.MatchType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import simbot.example.BootAPIUse.API;
+import simbot.example.BootAPIUse.OtherAPI.OtherApi;
 import simbot.example.Service.BlackListService;
 import simbot.example.core.common.Constant;
 import simbot.example.core.common.TimeTranslate;
@@ -33,8 +33,11 @@ import java.util.concurrent.TimeUnit;
 @Service
 public class PictureApiUse extends Constant {
 
-    @Autowired
     BlackListService blackListService;
+    @Autowired
+    public PictureApiUse(BlackListService blackListService) {
+        this.blackListService = blackListService;
+    }
 
     /**
      * 线程池
@@ -49,7 +52,7 @@ public class PictureApiUse extends Constant {
     /**
      * 调用API接口的类
      */
-    public API api = new API();
+    public OtherApi otherApi = new OtherApi();
 
 
     /**
@@ -73,8 +76,8 @@ public class PictureApiUse extends Constant {
         int groupBanId = (int) Arrays.stream(groupBanIdList).filter(groupInfo.getGroupCode()::contains).count();
 
         CatCodeUtil util = CatCodeUtil.INSTANCE;
-        String imgMsg = api.twoDimensional();
-        String url = api.url;
+        String imgMsg = otherApi.twoDimensional();
+        String url = otherApi.url;
 
         // 线程池
         THREAD_POOL = new ThreadPoolExecutor(50, 50, 3,

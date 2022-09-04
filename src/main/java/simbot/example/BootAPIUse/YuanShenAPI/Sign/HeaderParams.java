@@ -19,7 +19,8 @@ public class HeaderParams {
     public static String getRandomStr() {
         Random random = new Random();
         StringBuilder sb = new StringBuilder();
-        for (int i = 1; i <= 6; i++) {
+        int length = 6;
+        for (int i = 1; i <= length; i++) {
             String constants = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
             int number = random.nextInt(constants.length());
             char charAt = constants.charAt(number);
@@ -29,13 +30,14 @@ public class HeaderParams {
     }
 
     /**
-     * @param n 参数1
+     * 创建DS
+     *
      * @param i 参数2
      * @param r 参数3
      * @return 返回创建的DS
      */
-    private static String createDS(String n, String i, String r) {
-        String c = DigestUtils.md5Hex("salt=" + n + "&t=" + i + "&r=" + r);
+    private static String createDs(String i, String r) {
+        String c = DigestUtils.md5Hex("salt=z8DRIUjNDT7IT5IZXvrUAxyupA1peND9&t=" + i + "&r=" + r);
         return String.format("%s,%s,%s", i, r, c);
     }
 
@@ -44,10 +46,10 @@ public class HeaderParams {
      *
      * @return 返回能加入Headers中的DS
      */
-    public static String getDS() {
+    public static String getDs() {
         String i = (System.currentTimeMillis() / 1000) + "";
         String r = getRandomStr();
-        return createDS("z8DRIUjNDT7IT5IZXvrUAxyupA1peND9", i, r);
+        return createDs(i, r);
 
     }
 }

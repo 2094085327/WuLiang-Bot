@@ -15,17 +15,22 @@ import java.util.List;
  * @Author zeng
  * @Date 2022/8/26 11:01
  * @User 86188
- * @Description:
+ * @Description: 原神签到相关服务
  */
 @Service
 public class GenShinService {
 
-    @Autowired
+
     GenShinMapper genShinMapper;
 
-    GenShinSign genShinSign = new GenShinSign();
+    GenShinSign genShinSign ;
 
     GenShinUser genShinUser = new GenShinUser();
+    @Autowired
+    public GenShinService(GenShinMapper genShinMapper, GenShinSign genShinSign) {
+        this.genShinMapper = genShinMapper;
+        this.genShinSign = genShinSign;
+    }
 
     /**
      * 根据uid搜索数据
@@ -133,13 +138,23 @@ public class GenShinService {
         queryWrapper.like("qqid", qqid);
 
         List<GenShinUser> blackListUsers = genShinMapper.selectList(queryWrapper);
-        System.out.println(blackListUsers);
-        StringBuilder msg = new StringBuilder("当前QQ号绑定的账户:\n");
-        for (GenShinUser genShinUser : blackListUsers) {
-            msg.append(genShinUser.getUid()).append(" ").append(genShinUser.getNickname()).append("\n");
+        int userNumber = blackListUsers.size();
+        if (blackListUsers.size() != 0) {
+            System.out.println(blackListUsers);
+            StringBuilder msg = new StringBuilder("当前QQ号绑定的账户:\n");
+            for (GenShinUser genShinUser : blackListUsers) {
+                msg.append(genShinUser.getUid()).append(" ").append(genShinUser.getNickname());
+                if (userNumber > 1) {
+                    msg.append("\n");
+                    userNumber -= 1;
+                }
+            }
+
+            return String.valueOf(msg);
         }
-        return String.valueOf(msg);
+        return "[CAT:at,code=" + qqid + "]你还没有绑定账户哦";
     }
+
     public String showAllList() {
 
         QueryWrapper<GenShinUser> queryWrapper = Wrappers.query();

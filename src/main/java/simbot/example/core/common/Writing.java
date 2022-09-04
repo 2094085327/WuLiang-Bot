@@ -12,13 +12,14 @@ import java.io.IOException;
  */
 public class Writing {
 
-    // 将群聊和私聊消息记入日志
+    /**
+     * 将群聊和私聊消息记入日志
+     *
+     * @param content 变更记录
+     */
     public void write(String content) {
         try {
             File file = new File("监听记录.md");
-            if (!file.exists()) {
-                file.createNewFile();
-            }
             FileWriter fileWriter = new FileWriter(file.getAbsoluteFile(), true);
             BufferedWriter bw = new BufferedWriter(fileWriter);
             bw.write(content);

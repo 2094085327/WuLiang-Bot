@@ -11,8 +11,8 @@ import love.forte.simbot.timer.Cron;
 import love.forte.simbot.timer.EnableTimeTask;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import simbot.example.BootAPIUse.API;
 import simbot.example.BootAPIUse.OtherAPI.NewsApi;
+import simbot.example.BootAPIUse.OtherAPI.OtherApi;
 import simbot.example.BootAPIUse.YuanShenAPI.Sign.GenShinSign;
 import simbot.example.Enity.GenShinUser;
 import simbot.example.Mapper.GenShinMapper;
@@ -21,26 +21,25 @@ import simbot.example.Service.GenShinService;
 import javax.annotation.Resource;
 import java.util.List;
 
-
 /**
  * @author zeng
  * @date 2022/6/25 0:03
  * @user 86188
  */
-
 @Service
 @EnableTimeTask
+@SuppressWarnings("unused")
 public class MyTast extends Constant {
 
-    @Autowired
     GenShinService genShinService;
-
-    @Autowired
     GenShinMapper genShinMapper;
 
+    @Autowired
+    public MyTast(GenShinService genShinService, GenShinMapper genShinMapper) {
+        this.genShinService = genShinService;
+        this.genShinMapper = genShinMapper;
+    }
 
-    public NewsApi news = new NewsApi();
-    static int i = 1;
 
     /**
      * 构建机器人管理器
@@ -67,7 +66,7 @@ public class MyTast extends Constant {
     /**
      * 调用每日一言APi
      */
-    public API api = new API();
+    public OtherApi otherApi = new OtherApi();
 
     TimeTranslate time2 = new TimeTranslate();
 
@@ -82,7 +81,7 @@ public class MyTast extends Constant {
         BotSender botSender = bot.getSender();
 
 
-        botSender.SENDER.sendGroupMsg("1043409458", api.EverydaySentences());
+        botSender.SENDER.sendGroupMsg("1043409458", otherApi.everydaySentences());
 
     }
 
@@ -98,15 +97,25 @@ public class MyTast extends Constant {
         botSender.SENDER.sendGroupMsg("1043409458", img);
     }
 
-    //@Fixed(value = 30, timeUnit = TimeUnit.SECONDS)
+    @Cron(value = "0 00 07 * * ? *")
+    public void sendNews() {
+        NewsApi newsApi = new NewsApi();
+        sendGroupMsg("1043409458", String.valueOf(newsApi.getNewsMsg()));
+    }
+
+    /**
+     * #@Fixed(value = 30, timeUnit = TimeUnit. SECONDS)
+     */
     public void bLive() {
         Bot bot = manager.getBot("341677404");
         BotSender botSender = bot.getSender();
-        if ("false".equals(BLIVESTATE)) {
-            api.bLiveHelp(BiUpUid);
+        String state1 = "false";
+        String state2 = "true";
+        if (state1.equals(BLIVESTATE)) {
+            otherApi.bLiveHelp(BiUpUid);
         }
-        if ("true".equals(BLIVESTATE)) {
-            botSender.SENDER.sendGroupMsg("140469072", api.bLive(BiUpUid));
+        if (state2.equals(BLIVESTATE)) {
+            botSender.SENDER.sendGroupMsg("140469072", otherApi.bLive(BiUpUid));
         }
     }
 
@@ -136,7 +145,10 @@ public class MyTast extends Constant {
                     String atPeople = "[CAT:at,code=" + genShinUser.getQqid() + "]";
                     sendGroupMsg("1019170385", atPeople + GenShinSign.getMessage());
 
-                    sendGroupMsg("140469072", GenShinSign.getItemMsg() + "\n" + util.toCat("image", true, "file=" + GenShinSign.getItemImg()));
+                    genShinSign.signList(genShinUser.getUid());
+                    System.out.println(GenShinSign.getItemImg());
+
+                    sendGroupMsg("1019170385", GenShinSign.getItemMsg() + "\n" + util.toCat("image", true, "file=" + GenShinSign.getItemImg()));
                 }
                 genShinSign.signList(genShinUser.getUid());
 

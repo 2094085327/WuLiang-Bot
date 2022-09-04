@@ -31,12 +31,17 @@ public class YuanShenApiUse extends Constant {
     /**
      * 通过自动装配构建消息工厂
      */
-    @Autowired
     MessageContentBuilderFactory messageContentBuilderFactory;
-
-    @Autowired
+    /**
+     * 黑名单
+     */
     BlackListService blackListService;
 
+    @Autowired
+    public YuanShenApiUse(MessageContentBuilderFactory messageContentBuilderFactory, BlackListService blackListService) {
+        this.messageContentBuilderFactory = messageContentBuilderFactory;
+        this.blackListService = blackListService;
+    }
 
     @OnGroup
     @Filter(value = "原神抽卡分析", matchType = MatchType.CONTAINS, trim = true)
@@ -50,7 +55,7 @@ public class YuanShenApiUse extends Constant {
 
             String url = YuanApi.toUrl(groupMsg.getMsg());
             String urlCheckType = YuanApi.checkApi(url);
-            if (!"OK".equals(urlCheckType)) {
+            if (!YuanConstant.APISTATE3.equals(urlCheckType)) {
                 assert urlCheckType != null;
                 msgSender.SENDER.sendGroupMsg(groupMsg, urlCheckType);
             } else {
@@ -67,7 +72,7 @@ public class YuanShenApiUse extends Constant {
 
                 YuanApi.allData1();
 
-                YuanApi.fincount = 0;
+                YuanApi.finCount = 0;
                 YuanApi.finFiveStar = 0;
                 YuanApi.finProbability = 0;
 

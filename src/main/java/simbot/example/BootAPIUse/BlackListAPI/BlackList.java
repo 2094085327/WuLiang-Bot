@@ -24,6 +24,19 @@ import java.util.Arrays;
 @Service
 public class BlackList extends Constant {
 
+    /**
+     * 自动装配service
+     */
+
+    BlackListService blackListService;
+    @Autowired
+    public BlackList(BlackListService blackListService) {
+        this.blackListService = blackListService;
+    }
+
+    public BlackList() {
+    }
+
     private static String codes;
     private static String nickName;
     private static String allLists;
@@ -52,11 +65,7 @@ public class BlackList extends Constant {
         BlackList.nickName = nickName;
     }
 
-    /**
-     * 自动装配service
-     */
-    @Autowired
-    BlackListService blackListService;
+
 
     /**
      * 加入黑名单，禁用一切功能

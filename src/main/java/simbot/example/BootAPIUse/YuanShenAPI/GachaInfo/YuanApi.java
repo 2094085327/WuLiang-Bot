@@ -20,7 +20,7 @@ public class YuanApi extends YuanConstant {
 
     public static double finProbability;
     public static int finFiveStar;
-    public static float fincount;
+    public static float finCount;
     public static float poolCount = 3;
 
     /**
@@ -81,13 +81,13 @@ public class YuanApi extends YuanConstant {
             String jsonStr = HttpUtil.get(urls);
             JSONObject jsonObject = JSONObject.fromObject(jsonStr);
             String message = jsonObject.getString("message");
-            if ("authkey error".equals(message)) {
+            if (YuanConstant.APISTATE1.equals(message)) {
                 return "链接有错误哦，请重新获取链接给无量姬！";
             }
-            if ("authkey timeout".equals(message)) {
+            if (YuanConstant.APISTATE2.equals(message)) {
                 return "链接过期啦，请重新获取链接给无量姬！";
             }
-            if ("OK".equals(message)) {
+            if (YuanConstant.APISTATE3.equals(message)) {
                 return "OK";
             } else {
                 return "数据为空，错误代码：" + message;
@@ -142,7 +142,6 @@ public class YuanApi extends YuanConstant {
             if (length == 0) {
                 break;
             }
-
             // 获取当前页最后一个数据的id以进行翻页
             endId = jsonArray.getJSONObject(length - 1).getString("id");
 
@@ -169,17 +168,14 @@ public class YuanApi extends YuanConstant {
                         // 将歪的角色的抽数与姓名加入list
                         fivePeopleCount.add(String.valueOf(fiveGachaCount));
                         fivePeopleCount.add(name + "(歪)");
-
                     } else {
 
                         // 没歪的角色姓名与抽数
                         fivePeopleCount.add(String.valueOf(fiveGachaCount));
                         fivePeopleCount.add(name);
-
                     }
                     // 将五星计数归零
                     fiveGachaCount = 0;
-
                 }
 
             }
@@ -199,15 +195,15 @@ public class YuanApi extends YuanConstant {
 
         // 欧非判断公式 以(1-平均出金数/90)*50%+(不歪的几率*50%) 作为概率
         double probability = (1 - (averageFive / 80) + guaranteedP * 0.5) * 100;
-        if (!rangeInDefined(probability)) {
+        if (rangeInDefined(probability)) {
             probability = 0;
-            averageFiveString ="--";
+            averageFiveString = "--";
             alreadyCost = count;
             poolCount--;
         }
 
 
-        fincount += count;
+        finCount += count;
         finFiveStar += fiveStar;
         finProbability += probability * (1 / poolCount);
 
@@ -240,8 +236,8 @@ public class YuanApi extends YuanConstant {
 
         // 五星角色与对应抽数
         ArrayList<String> fivePeopleCount = new ArrayList<>();
-
-        for (int i = 1; i < 9999; i++) {
+        int page = 9999;
+        for (int i = 1; i < page; i++) {
             String newUrl = getUrl(url, "302", i, endId);
             // 请求json数据
             String jsonStr = HttpUtil.get(newUrl);
@@ -320,16 +316,16 @@ public class YuanApi extends YuanConstant {
 
         // 欧非判断公式 以(1-平均出金数/90)+(不歪的几率*50%) 作为概率
         double probability = (1 - (averageFive / 80) + guaranteedP * 0.5) * 100;
-        if (!rangeInDefined(probability)) {
+        if (rangeInDefined(probability)) {
             probability = 0;
-            averageFiveString ="--";
+            averageFiveString = "--";
             alreadyCost = count;
             poolCount--;
         }
 
         picture.armsPole(averageFiveString, String.valueOf(count), fivePeopleCount, String.valueOf(alreadyCost), limited, probability);
 
-        fincount += count;
+        finCount += count;
         finFiveStar += fiveStar;
         finProbability += probability * (1 / poolCount);
 
@@ -422,16 +418,16 @@ public class YuanApi extends YuanConstant {
 
         // 欧非判断公式
         double probability = (1 - (averageFive / 90)) * 100;
-        if (!rangeInDefined(probability)) {
+        if (rangeInDefined(probability)) {
             probability = 0;
-            averageFiveString ="--";
+            averageFiveString = "--";
             alreadyCost = count;
             poolCount--;
         }
 
         picture.permanentPool(averageFiveString, String.valueOf(count), fivePeopleCount, String.valueOf(alreadyCost), String.valueOf(fiveStar), probability);
 
-        fincount += count;
+        finCount += count;
         finFiveStar += fiveStar;
         finProbability += probability * (1 / poolCount);
 
@@ -442,9 +438,9 @@ public class YuanApi extends YuanConstant {
 
     public static void allData1() throws IOException {
 
-        String aveFive = String.format("%.1f", (fincount - finFiveStar) / finFiveStar);
+        String aveFive = String.format("%.1f", (finCount - finFiveStar) / finFiveStar);
         System.out.println(aveFive);
-        picture.allDataMake(aveFive, String.valueOf(String.format("%.0f", fincount)), String.valueOf(finFiveStar), finProbability);
+        picture.allDataMake(aveFive, String.valueOf(String.format("%.0f", finCount)), String.valueOf(finFiveStar), finProbability);
 
     }
 
@@ -455,7 +451,7 @@ public class YuanApi extends YuanConstant {
      * @return 返回判断
      */
     public static boolean rangeInDefined(double current) {
-        return Math.max(0, current) == Math.min(current, 150);
+        return Math.max(0, current) != Math.min(current, 150);
     }
 
 

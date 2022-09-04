@@ -19,8 +19,11 @@ import java.util.List;
 @Service
 public class BlackListService {
 
-    @Autowired
     BlackListMapper blackListMapper;
+    @Autowired
+    public BlackListService(BlackListMapper blackListMapper) {
+        this.blackListMapper = blackListMapper;
+    }
 
     BlackListUser blackListUser = new BlackListUser();
     BlackList blackList = new BlackList();
@@ -79,8 +82,13 @@ public class BlackListService {
         List<BlackListUser> blackListUsers = blackListMapper.selectList(null);
         System.out.println(blackListUsers);
         StringBuilder msg = new StringBuilder("黑名单列表:\n");
+        int listNumber = blackListUsers.size();
         for (BlackListUser listUser : blackListUsers) {
-            msg.append(listUser.getCode()).append(" ").append(listUser.getNickname()).append("\n");
+            msg.append(listUser.getCode()).append(" ").append(listUser.getNickname());
+            if (listNumber > 1) {
+                msg.append("\n");
+                listNumber -= 1;
+            }
         }
         BlackList.setAllLists(String.valueOf(msg));
     }

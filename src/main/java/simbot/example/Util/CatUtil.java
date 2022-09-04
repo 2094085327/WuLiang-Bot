@@ -19,12 +19,6 @@ import java.util.*;
  * @date 2022/7/25 20:50
  * @user 86188
  */
-
-
-/**
- * @author wuyou<br>
- * 2020年5月3日
- */
 @SuppressWarnings("unused")
 public class CatUtil {
     public static final CatCodeUtil UTILS = CatCodeUtil.getInstance();
@@ -232,23 +226,24 @@ public class CatUtil {
         return NEKO_TEMPLATE.face(id);
     }
 
-//    /**
-//     * 获取音乐的猫猫码
-//     *
-//     * @param musicInfo 音乐信息
-//     * @return Neko
-//     */
-//    public static Neko getMusic(MusicInfo musicInfo) {
-//        Map<String, String> map = new HashMap<>(8);
-//        map.put("content", musicInfo.getArtist());
-//        map.put("type", musicInfo.getType().getType());
-//        map.put("musicUrl", musicInfo.getMusicUrl());
-//        map.put("title", musicInfo.getTitle());
-//        map.put("pictureUrl", musicInfo.getPreviewUrl());
-//        map.put("jumpUrl", musicInfo.getJumpUrl());
-//        map.put("brief", "[分享]" + musicInfo.getTitle());
-//        return CatUtil.UTILS.toNeko(CatType.MUSIC, map);
-//    }
+    /**
+     * 获取音乐的猫猫码
+     *
+     * @param musicInfo 音乐信息
+     * @return Neko
+     */
+    /*
+    public static Neko getMusic(MusicInfo musicInfo) {
+        Map<String, String> map = new HashMap<>(8);
+        map.put("content", musicInfo.getArtist());
+        map.put("type", musicInfo.getType().getType());
+        map.put("musicUrl", musicInfo.getMusicUrl());
+        map.put("title", musicInfo.getTitle());
+        map.put("pictureUrl", musicInfo.getPreviewUrl());
+        map.put("jumpUrl", musicInfo.getJumpUrl());
+        map.put("brief", "[分享]" + musicInfo.getTitle());
+        return CatUtil.UTILS.toNeko(CatType.MUSIC, map);
+    }*/
 
     /**
      * 获取语音的猫猫码

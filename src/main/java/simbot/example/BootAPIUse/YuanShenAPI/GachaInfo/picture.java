@@ -19,7 +19,7 @@ import java.util.Iterator;
  * @date 2022/8/7 18:09
  * @user 86188
  */
-
+@SuppressWarnings("unused")
 public class picture {
 
     /**

@@ -8,7 +8,6 @@ import simbot.example.Util.HttpUtils;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 
 /**
  * @author zeng
@@ -105,7 +104,18 @@ public class GenShinSign {
 
             Map<String, Object> data = new HashMap<>(3);
             data.put("act_id", SignConstant.ACT_ID);
-            data.put("region", SignConstant.REGION);
+
+            String firstUid = uid.substring(0, 1);
+
+
+            // UID首位1 2为官服
+            if (SignConstant.FIRSTUID1.equals(firstUid) || SignConstant.FIRSTUID2.equals(firstUid)) {
+                data.put("region", SignConstant.REGION);
+            }
+            // 5为B服
+            if (SignConstant.FIRSTUID3.equals(firstUid)) {
+                data.put("region", SignConstant.REGION2);
+            }
             data.put("uid", uid);
             JSONObject signResult = HttpUtils.doPost(SignConstant.SIGN_URL, HeaderBuilder.getHeaders(), data);
             System.out.println(signResult);
@@ -121,8 +131,8 @@ public class GenShinSign {
             if (retcode == SignConstant.RETCODE3) {
                 message = "签到成功";
                 return true;
-            }else {
-                message = "未知错误，错误码:"+retcode;
+            } else {
+                message = "未知错误，错误码:" + retcode;
                 return false;
             }
 
@@ -162,9 +172,8 @@ public class GenShinSign {
 
         String img = jsonArray.getJSONObject(totalSignDay).getString("icon");
 
-        setItemMsg("今天获取的奖励是:" + itemName + "X" + itemCnt);
+        setItemMsg("今天获取的奖励是:[" + itemName + "X" + itemCnt + "]");
         setItemImg(img);
-        //return isSign;
     }
 
 }

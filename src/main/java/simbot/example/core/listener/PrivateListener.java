@@ -12,10 +12,10 @@ import love.forte.simbot.filter.MatchType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import simbot.example.BootAPIUse.MlyaiAPI.MlyaiApi;
+import simbot.example.BootAPIUse.OtherAPI.OtherApi;
 import simbot.example.core.common.Constant;
 import simbot.example.core.common.TimeTranslate;
 import simbot.example.core.common.Writing;
-import simbot.example.BootAPIUse.API;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -30,14 +30,17 @@ import java.util.concurrent.TimeUnit;
 @Service
 public class PrivateListener extends Constant {
 
-    @Autowired
-    MlyaiApi mlyaiApi = new MlyaiApi();
+    MlyaiApi mlyaiApi;
 
+    @Autowired
+    public PrivateListener(MlyaiApi mlyaiApi) {
+        this.mlyaiApi = mlyaiApi;
+    }
 
     /**
      * 调用API接口的类
      */
-    public API api = new API();
+    public OtherApi otherApi = new OtherApi();
 
     public static ExecutorService THREAD_POOL;
 
@@ -60,17 +63,6 @@ public class PrivateListener extends Constant {
         } else {
             msgSender.SENDER.sendPrivateMsg(privateMsg, "你没有姬姬的权限哦~");
         }
-    }
-
-    /**
-     * 解除禁言模块
-     * #@Filter() 注解为消息过滤器
-     * @param msgSender 用于在私聊中发送消息
-     */
-    @OnPrivate
-    @Filter(value = "发消息", matchType = MatchType.REGEX_MATCHES, trim = true)
-    public void sendmsg(MsgSender msgSender, PrivateMsg privateMsg) {
-        msgSender.SENDER.sendPrivateMsg(2094085327, "早，这是测试");
     }
 
     /**
@@ -105,7 +97,6 @@ public class PrivateListener extends Constant {
     @Listen(PrivateMsg.class)
     public void fudu(PrivateMsg msg, Sender sender, MsgSender msgSender) {
 
-
         // 创建线程池
         THREAD_POOL = new ThreadPoolExecutor(50, 50, 10000,
                 TimeUnit.SECONDS, new LinkedBlockingQueue<>(50), r -> {
@@ -122,11 +113,8 @@ public class PrivateListener extends Constant {
         TimeTranslate time1 = new TimeTranslate();
         String format1 = time1.tt();
 
-
         //在控制台输出信息
-        String personMsg = "[" + format1 + "]" + "用户[" + accountInfo.getAccountNickname()
-                + "/" + accountInfo.getAccountCode() + "]给bot[" + botInfo.getBotName()
-                + "]" + "发送了信息：" + msg.getMsg();
+        String personMsg = "[" + format1 + "]" + "用户[" + accountInfo.getAccountNickname() + "/" + accountInfo.getAccountCode() + "]给bot[" + botInfo.getBotName() + "]" + "发送了信息：" + msg.getMsg();
         System.out.println(personMsg);
 
         //将信息存入日志

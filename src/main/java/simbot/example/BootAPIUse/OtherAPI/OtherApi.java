@@ -1,15 +1,12 @@
-package simbot.example.BootAPIUse;
+package simbot.example.BootAPIUse.OtherAPI;
 
 import cn.hutool.http.HttpUtil;
-
 import net.sf.json.JSONObject;
 import org.json.JSONArray;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 import simbot.example.core.common.Constant;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -21,20 +18,18 @@ import java.util.regex.Pattern;
  */
 @Component
 @ConfigurationProperties(prefix = "artificial")
-public class API extends Constant {
-    public String appid;
+public class OtherApi extends Constant {
+
     public String key;
 
     public String url;
-
-    public Map<String, Object> params = new HashMap<>();
 
     /**
      * 每日一言APi-通过正则匹配获取HTML格式的信息
      *
      * @return 返回从api获得的每日一言
      */
-    public String EverydaySentences() {
+    public String everydaySentences() {
 
         // 因为不需要推送参数，所以直接使用get方法
         String jsonStr = HttpUtil.get("https://v.api.aa1.cn/api/yiyan/index.php");
@@ -58,7 +53,7 @@ public class API extends Constant {
      *
      * @return 返回当期青年大学习的题目与答案
      */
-    public String YouthStudy() {
+    public String youthStudy() {
         return HttpUtil.createGet("https://api.klizi.cn/API/other/youth.php").execute().body();
     }
 
@@ -100,7 +95,6 @@ public class API extends Constant {
 
             return "Title:" + title + "\n\nAuthor:" + author + "\n\nR18:" + r18 + "\n\nTags:" + tags + "\n\nURL:" + urls;
         } catch (Exception e) {
-            System.out.println(e);
             this.url = "https://gchat.qpic.cn/gchatpic_new/2094085327/2083469072-2232305563-72311C09F00D0DBEF47CF5B070311E46/0?term&#61;2";
             return "啊哦~涩图不见了呢";
         }
@@ -127,7 +121,8 @@ public class API extends Constant {
             String title = id.getString("title");
             String liveTime = id.getString("live_time");
             String msg = "";
-            if ("1".equals(liveStatus)) {
+            String state = "1";
+            if (state.equals(liveStatus)) {
                 msg += "直播间正在直播中\n";
                 BLIVESTATE = "false";
                 SendTwice = "false";
@@ -160,8 +155,8 @@ public class API extends Constant {
             JSONObject byUids = data.getJSONObject("by_uids");
             JSONObject id = byUids.getJSONObject(uid);
             String liveStatus = id.getString("live_status");
-
-            if ("0".equals(liveStatus)) {
+            String state = "0";
+            if (state.equals(liveStatus)) {
                 BLIVESTATE = "true";
             } else {
                 BLIVESTATE = "false";

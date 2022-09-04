@@ -5,6 +5,7 @@ package simbot.example.BootAPIUse.YuanShenAPI.Sign;
  * @date 2022/8/18 13:41
  * @user 86188
  */
+@SuppressWarnings("unused")
 public class SignConstant {
     /**
      * 切勿乱修改
@@ -28,7 +29,11 @@ public class SignConstant {
     /**
      * B服服务id
      */
-    public static final String REGION2 = "cn_gf01";
+    public static final String REGION2 = "cn_qd01";
+
+    public static final String FIRSTUID1 = "1";
+    public static final String FIRSTUID2 = "2";
+    public static final String FIRSTUID3 = "5";
 
     /**
      * Referer网址

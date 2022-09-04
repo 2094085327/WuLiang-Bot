@@ -38,6 +38,7 @@ public class kedaya {
 
             switch (i) {
                 case 0:
+                case 17:
                     rotate(left, graphics, 56, 100, -5.1);
                     break;
                 case 1:
@@ -81,9 +82,6 @@ public class kedaya {
                     break;
                 case 16:
                     rotate(left, graphics, 60, 100, -5.1);
-                    break;
-                case 17:
-                    rotate(left, graphics, 56, 100, -5.1);
                     break;
                 default:
                     break;

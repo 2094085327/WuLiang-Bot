@@ -1,6 +1,5 @@
 package simbot.example.BootAPIUse.MlyaiAPI;
 
-import catcode.CatCodeUtil;
 import love.forte.simbot.annotation.Filter;
 import love.forte.simbot.annotation.OnGroup;
 import love.forte.simbot.annotation.OnPrivate;
@@ -13,11 +12,10 @@ import love.forte.simbot.api.sender.MsgSender;
 import love.forte.simbot.api.sender.Sender;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import simbot.example.BootAPIUse.API;
+import simbot.example.BootAPIUse.OtherAPI.OtherApi;
 import simbot.example.Service.BlackListService;
 import simbot.example.core.common.Constant;
 
-import java.io.File;
 import java.util.Arrays;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -31,10 +29,16 @@ import java.util.concurrent.TimeUnit;
  */
 @Service
 public class MlyaiApiUse extends Constant {
-    @Autowired
-    BlackListService blackListService;
 
+    BlackListService blackListService;
     final MlyaiApi mlyaiApi;
+
+    @Autowired
+    public MlyaiApiUse(BlackListService blackListService, MlyaiApi mlyaiApi) {
+        this.blackListService = blackListService;
+        this.mlyaiApi = mlyaiApi;
+    }
+
 
     public MlyaiApiUse(MlyaiApi mlyaiApi) {
         this.mlyaiApi = mlyaiApi;
@@ -45,7 +49,7 @@ public class MlyaiApiUse extends Constant {
     /**
      * 调用API接口的类
      */
-    public API api = new API();
+    public OtherApi otherApi = new OtherApi();
 
     /**
      * 人工智能回复模块
@@ -76,14 +80,9 @@ public class MlyaiApiUse extends Constant {
         if (listSize != 1) {
             // 将在BAN列表中的群排除在人工智能答复模块外
             if (groupBanId != 1 && BOOTSTATE && blackListService.selectCode(accountInfo.getAccountCode()) == null) {
+
                 msgSender.SENDER.sendGroupMsg(groupMsg, mlyaiApi.chat(content, id, fromName, 2, groupId, groupName));
                 System.out.println(content);
-                /*  CatCodeUtil util = CatCodeUtil.INSTANCE;
-
-                 String voice = util.toCat("voice", true, "file="
-                 + api.record(reMsg));
-                 sender.sendGroupMsg(groupMsg, voice);*/
-
             }
             // 当被Bot在被屏蔽的群组中被@时将消息转发至User
             if (groupBanId == 1) {
@@ -122,52 +121,32 @@ public class MlyaiApiUse extends Constant {
 
         if (BOOTSTATE && listSize != 1 && blackListService.selectCode(accountInfo.getAccountCode()) == null) {
 
-            //检测到特定私信内容进行特定回复
-            if ("hi".equals(privateMsg.getMsg()) || "你好".equals(privateMsg.getMsg())) {
+            THREAD_POOL.execute(() -> {
 
-                CatCodeUtil util = CatCodeUtil.INSTANCE;
-                sender.sendPrivateMsg(privateMsg, "嗨！");
+                // 获取消息的flag
+                MessageGet.MessageFlag<? extends MessageGet.MessageFlagContent>
+                        flag = null;
+                try {
+                    // 为私聊消息增加延迟更加拟真
+                    Thread.sleep(10000);
 
-                // 项目路径
-                File file = new File(System.getProperty("user.dir"));
-                System.out.println(file);
-                String voice = util.toCat("voice", true, "file=" + api.record(msgs));
+                    // 创立消息标记用于撤回
+                    flag = (MessageGet.MessageFlag<? extends MessageGet.MessageFlagContent>) sender.sendPrivateMsg(privateMsg, mlyaiApi.chat(privateMsg.getText(), accountInfo.getAccountCode(), accountInfo.getAccountNickname(), 1, null, null)).get();
 
-                System.out.println(voice);
+                    // 休眠10000ms后撤回消息
+                    Thread.sleep(10000);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
 
-                sender.sendPrivateMsg(privateMsg, voice);
+                // 撤回操作
+                if (flag != null) {
+                    msgSender.SETTER.setMsgRecall(flag);
+                } else {
+                    System.out.println("没有撤回的消息");
+                }
 
-
-            } else {
-
-                THREAD_POOL.execute(() -> {
-
-                    // 获取消息的flag
-                    MessageGet.MessageFlag<? extends MessageGet.MessageFlagContent>
-                            flag = null;
-                    try {
-                        // 为私聊消息增加延迟更加拟真
-                        Thread.sleep(10000);
-
-                        // 创立消息标记用于撤回
-                        flag = (MessageGet.MessageFlag<? extends MessageGet.MessageFlagContent>) sender.sendPrivateMsg(privateMsg, mlyaiApi.chat(privateMsg.getText(), accountInfo.getAccountCode(), accountInfo.getAccountNickname(), 1, null, null)).get();
-
-                        // 休眠10000ms后撤回消息
-                        Thread.sleep(10000);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-
-                    // 撤回操作
-                    if (flag != null) {
-                        msgSender.SETTER.setMsgRecall(flag);
-                    } else {
-                        System.out.println("没有撤回的消息");
-                    }
-
-                });
-            }
+            });
         }
     }
-
 }

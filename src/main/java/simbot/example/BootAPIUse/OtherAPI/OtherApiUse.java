@@ -15,7 +15,6 @@ import love.forte.simbot.api.sender.Setter;
 import love.forte.simbot.filter.MatchType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import simbot.example.BootAPIUse.API;
 import simbot.example.Service.BlackListService;
 import simbot.example.core.common.Constant;
 
@@ -42,16 +41,19 @@ public class OtherApiUse extends Constant {
     /**
      * 通过自动装配构建消息工厂
      */
-    @Autowired
     MessageContentBuilderFactory messageContentBuilderFactory;
+    BlackListService blackListService;
 
     @Autowired
-    BlackListService blackListService;
+    public OtherApiUse(MessageContentBuilderFactory messageContentBuilderFactory, BlackListService blackListService) {
+        this.messageContentBuilderFactory = messageContentBuilderFactory;
+        this.blackListService = blackListService;
+    }
 
     /**
      * 调用API中的方法
      */
-    API api = new API();
+    OtherApi otherApi = new OtherApi();
 
     /**
      * 青年大学习模块
@@ -73,7 +75,7 @@ public class OtherApiUse extends Constant {
             int groupBanId = (int) Arrays.stream(groupBanIdList).filter(groupInfo.getGroupCode()::contains).count();
             // 将群号为“637384877”的群排除在人工智能答复模块外
             if (groupBanId != 1) {
-                sender.sendGroupMsg(groupMsg, api.YouthStudy());
+                sender.sendGroupMsg(groupMsg, otherApi.youthStudy());
 
             }
         }
@@ -98,7 +100,7 @@ public class OtherApiUse extends Constant {
             int groupBanId = (int) Arrays.stream(groupBanIdList).filter(groupInfo.getGroupCode()::contains).count();
             // 将群号为“637384877”的群排除在人工智能答复模块外
             if (groupBanId != 1) {
-                sender.sendGroupMsg(groupMsg, api.bLive(BiUpUid));
+                sender.sendGroupMsg(groupMsg, otherApi.bLive(BiUpUid));
             }
         }
     }
@@ -130,10 +132,12 @@ public class OtherApiUse extends Constant {
             right = right.trim();
             right = right.replace((char) 12288, ' ');
 
-            if (left.length() > 3) {
+            int msgLength = 3;
+
+            if (left.length() > msgLength) {
                 left = left.substring(0, 3) + "...";
             }
-            if (right.length() > 3) {
+            if (right.length() > msgLength) {
                 right = right.substring(0, 3) + "...";
             }
 

@@ -1,10 +1,8 @@
 package simbot.example.core.listener;
 
-import love.forte.common.ioc.annotation.Depend;
 import love.forte.simbot.annotation.*;
 import love.forte.simbot.api.message.MessageContent;
 import love.forte.simbot.api.message.MessageContentBuilder;
-import love.forte.simbot.api.message.MessageContentBuilderFactory;
 import love.forte.simbot.api.message.containers.AccountInfo;
 import love.forte.simbot.api.message.containers.GroupAccountInfo;
 import love.forte.simbot.api.message.containers.GroupInfo;
@@ -13,18 +11,26 @@ import love.forte.simbot.api.message.results.GroupMemberInfo;
 import love.forte.simbot.api.sender.MsgSender;
 import love.forte.simbot.api.sender.Sender;
 import love.forte.simbot.api.sender.Setter;
+import love.forte.simbot.bot.Bot;
 import love.forte.simbot.bot.BotManager;
+import love.forte.simbot.component.mirai.message.MiraiMessageContentBuilder;
+import love.forte.simbot.component.mirai.message.MiraiMessageContentBuilderFactory;
 import love.forte.simbot.filter.MatchType;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
-import simbot.example.BootAPIUse.API;
+import simbot.example.BootAPIUse.OtherAPI.OtherApi;
+import simbot.example.BootAPIUse.YuanShenAPI.Sign.SignConstant;
 import simbot.example.Service.BlackListService;
 import simbot.example.Util.CatUtil;
+import simbot.example.Util.ContextUtil;
 import simbot.example.core.common.Constant;
 import simbot.example.core.common.PeopleChangeWrite;
 import simbot.example.core.common.TimeTranslate;
 import simbot.example.core.common.Writing;
 
+import javax.annotation.PostConstruct;
+import javax.annotation.Resource;
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.concurrent.ExecutorService;
@@ -40,8 +46,27 @@ import java.util.concurrent.TimeUnit;
 @Service
 public class GroupListener extends Constant {
 
-    @Autowired
+    /**
+     * 黑名单
+     */
     BlackListService blackListService;
+    /**
+     * 合并转发
+     */
+    ApplicationContext applicationContext;
+
+    @Autowired
+    public GroupListener(BlackListService blackListService, ApplicationContext applicationContext) {
+        this.blackListService = blackListService;
+        this.applicationContext = applicationContext;
+    }
+
+    ContextUtil contextUtil = new ContextUtil();
+
+    /**
+     * 将信息存入日志
+     */
+    Writing writing = new Writing();
 
     public static ExecutorService THREAD_POOL;
 
@@ -50,12 +75,22 @@ public class GroupListener extends Constant {
      */
     public TimeTranslate time = new TimeTranslate();
 
+    /**
+     * 构建机器人管理器
+     */
+    @Resource
+    public BotManager manager;
 
     /**
      * 注入得到一个消息构建器工厂
      */
-    @Depend
-    private MessageContentBuilderFactory messageBuilderFactory;
+    private MiraiMessageContentBuilderFactory factory;
+
+    @PostConstruct
+    public void init() {
+        contextUtil.setApplicationContext(applicationContext);
+        factory = ContextUtil.getForwardBuilderFactory();
+    }
 
     /**
      * #@全体成员的猫猫码
@@ -65,75 +100,38 @@ public class GroupListener extends Constant {
     /**
      * 调用API接口的类
      */
-    public API api = new API();
+    public OtherApi otherApi = new OtherApi();
 
+    /**
+     * 日志记录
+     *
+     * @param groupMsg  群聊
+     * @param msgSender 消息发送
+     */
     @OnGroup
     public void group(GroupMsg groupMsg, MsgSender msgSender) {
-
-        Sender sender = msgSender.SENDER;
 
         // 群成员信息
         GroupAccountInfo accountInfo = groupMsg.getAccountInfo();
         // 群信息
         GroupInfo groupInfo = groupMsg.getGroupInfo();
-        // 获取群成员ID
-        String personId = accountInfo.getAccountCode();
-        // 获取群号
-        String groupId = groupInfo.getGroupCode();
-        // 根据不同群号向不同人发送消息
 
-        if (blackListService.selectCode(personId) == null) {
-            switch (groupId) {
-                case "1019170385":
-                    if (USERID1.equals(personId)) {
-                        break;
-                    }
+        // 获取时间
+        String format1 = time.tt();
 
-                case "140469072":
-                    if (USERID1.equals(personId)) {
-                        break;
-                    }
+        // 在控制台输出信息
+        String groupMsgPutOut = "[" + format1 + "]" + "用户[" + accountInfo.getAccountNickname() + "/"
+                + accountInfo.getAccountCode() + "]在群[" + groupInfo.getGroupCode()
+                + "][" + groupInfo.getGroupName() + "]发送了信息：" + groupMsg.getMsg();
 
-                case "1043409458":
-                    if (SENTENCE1.equals(groupMsg.getMsg()) ||
-                            SENTENCE5.equals(groupMsg.getMsg())) {
-                        sender.sendGroupMsg(groupMsg, "无量姬还会看好康的");
-                        sender.sendGroupMsg(groupMsg, "来点好康的");
-                    }
-                    if (SENTENCE2.equals(groupMsg.getMsg())) {
-                        sender.sendGroupMsg(groupMsg, "除了复读，无量姬还会看好康的");
-                        sender.sendGroupMsg(groupMsg, "来点好康的");
-                    }
-                    if (SENTENCE3.equals(groupMsg.getMsg()) ||
-                            "我好难过，居然和一群只会复读的机器人呆在一起，呜呜呜~~~~~".equals(groupMsg.getMsg())) {
-                        sender.sendGroupMsg(groupMsg, "那就和涩图在一起吧！");
-                        sender.sendGroupMsg(groupMsg, "来点好康的");
-                    }
-                    if (SENTENCE4.equals(groupMsg.getMsg())) {
-                        sender.sendGroupMsg(groupMsg, "就是说，肯定是涩图看少了，所以...");
-                        sender.sendGroupMsg(groupMsg, "来点好康的");
-                    }
-                    break;
-                default:
+        System.out.println(groupMsgPutOut);
 
-            }
-            // 获取时间
-            String format1 = time.tt();
-
-            // 在控制台输出信息
-            String groupMsgPutOut = "[" + format1 + "]" + "用户[" + accountInfo.getAccountNickname() + "/"
-                    + accountInfo.getAccountCode() + "]在群[" + groupInfo.getGroupCode()
-                    + "][" + groupInfo.getGroupName() + "]发送了信息：" + groupMsg.getMsg();
-            System.out.println(groupMsgPutOut);
-
-            // 将信息存入日志
-            Writing writing = new Writing();
-            writing.write(groupMsgPutOut + "\n");
-        }
+        writing.write(groupMsgPutOut + "\n");
     }
 
+
     /**
-     * 关机模块
+     * 帮助模块
      * #@Filter() 注解为消息过滤器
      *
      * @param groupMsg  用于获取群聊消息，群成员信息等
@@ -145,12 +143,20 @@ public class GroupListener extends Constant {
 
         GroupInfo groupInfo = groupMsg.getGroupInfo();
         AccountInfo accountInfo = groupMsg.getAccountInfo();
+        Bot bot = manager.getBot(BOOTID1);
 
         int groupBanId = (int) Arrays.stream(groupBanIdList).filter(groupInfo.getGroupCode()::contains).count();
         if (groupBanId != 1 && blackListService.selectCode(accountInfo.getAccountCode()) == null && BOOTSTATE) {
-            msgSender.SENDER.sendGroupMsg(groupMsg, Constant.HELPS);
+
+            MiraiMessageContentBuilder builder = factory.getMessageContentBuilder();
+            builder.forwardMessage(fun -> {
+                fun.add(bot.getBotInfo(), Constant.HELPS);
+                fun.add(bot.getBotInfo(), SignConstant.GENSHIN_HELP);
+            });
+            msgSender.SENDER.sendGroupMsg(groupMsg, builder.build());
         }
     }
+
 
     /**
      * 关机模块
@@ -230,7 +236,7 @@ public class GroupListener extends Constant {
         if (groupBanId != 1 && blackListService.selectCode(accountInfo.getAccountCode()) == null && BOOTSTATE) {
             if (groupMemberInfo.getPermission().isAdmin() || groupMemberInfo.getPermission().isOwner()) {
                 if (USERID1.equals(accountInfo.getAccountCode())) {
-                    sender.sendGroupMsg(groupId, cat1+groupMsg.getMsg());
+                    sender.sendGroupMsg(groupId, cat1 + groupMsg.getMsg());
                 } else {
                     sender.sendGroupMsg(groupMsg, atPeople + "你没有权限@全体成员哦");
                 }
@@ -348,7 +354,8 @@ public class GroupListener extends Constant {
         int groupBanId = (int) Arrays.stream(groupBanIdList).filter(groupInfo.getGroupCode()::contains).count();
         if (groupBanId != 1 && blackListService.selectCode(accountInfo.getAccountCode()) == null && BOOTSTATE) {
             if (setUser.equals(USERID1)) {
-                for (int i = 0; i < 20; i++) {
+                int times = 20;
+                for (int i = 0; i < times; i++) {
                     msgSender.SENDER.sendGroupMsg(groupMsg, "阿姬在！" + face2);
                 }
 
@@ -387,7 +394,7 @@ public class GroupListener extends Constant {
 
         if (groupInfo.getGroupCode().equals(GROUPID1) || groupInfo.getGroupCode().equals(GROUPID2) ||
                 groupInfo.getGroupCode().equals(GROUPID3) || groupInfo.getGroupCode().equals(GROUPID4)) {
-            msgSender.SENDER.sendPrivateMsg("2094085327", msg);
+            msgSender.SENDER.sendPrivateMsg(USERID1, msg);
         }
     }
 
@@ -401,7 +408,7 @@ public class GroupListener extends Constant {
     public void memberIncrease(GroupMemberIncrease groupMemberIncrease, MsgSender msgSender) {
 
         // 得到一个消息构建器。
-        MessageContentBuilder builder = messageBuilderFactory.getMessageContentBuilder();
+        MessageContentBuilder builder = factory.getMessageContentBuilder();
 
         //入群者信息
         AccountInfo accountInfo = groupMemberIncrease.getAccountInfo();
@@ -494,7 +501,6 @@ public class GroupListener extends Constant {
      *
      * @param groupMemberReduce 群成员减少信息
      */
-
     @OnGroupMemberReduce
     public void memberReduce(GroupMemberReduce groupMemberReduce, MsgSender msgSender) {
 

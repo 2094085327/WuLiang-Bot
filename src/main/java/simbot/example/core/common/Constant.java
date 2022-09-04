@@ -5,6 +5,7 @@ package simbot.example.core.common;
  * @date 2022/7/17 22:42
  * @user 86188
  */
+@SuppressWarnings("unused")
 public class Constant {
     public static final String CODE = "code";
     public String GROUPID1 = "1019170385";

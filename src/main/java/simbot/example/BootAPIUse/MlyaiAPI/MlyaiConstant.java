@@ -5,6 +5,7 @@ package simbot.example.BootAPIUse.MlyaiAPI;
  * @date 2022/8/22 7:47
  * @user 86188
  */
+@SuppressWarnings("unused")
 public class MlyaiConstant {
     String codeOk = "00000";
 

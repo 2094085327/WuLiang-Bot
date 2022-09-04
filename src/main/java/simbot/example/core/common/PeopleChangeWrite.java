@@ -12,7 +12,10 @@ import java.io.IOException;
  */
 public class PeopleChangeWrite {
 
-    // 群成员增加调用方法
+    /**
+     * 群成员增加调用方法
+     * @param content 变更记录
+     */
     public void writeIncrease(String content) {
         try {
             createFile(content);
@@ -22,7 +25,10 @@ public class PeopleChangeWrite {
         }
     }
 
-    // 群成员减少调用方法
+    /**
+     * 群成员减少调用方法
+     * @param content 变更记录
+     */
     public void writeReduce(String content) {
         try {
             createFile(content);
@@ -32,7 +38,10 @@ public class PeopleChangeWrite {
         }
     }
 
-    // 群成员申请调用方法
+    /**
+     * 群成员申请调用方法
+     * @param content 变更记录
+     */
     public void writeRequest(String content) {
         try {
             createFile(content);
@@ -42,7 +51,10 @@ public class PeopleChangeWrite {
         }
     }
 
-    // 好友申请调用方法
+    /**
+     * 好友申请调用方法
+     * @param content 变更记录
+     */
     public void friendRequest(String content) {
         try {
             createFile(content);
@@ -52,12 +64,13 @@ public class PeopleChangeWrite {
         }
     }
 
-    // 尝试创建文件
+    /**
+     * 尝试创建文件
+     * @param content 变更记录
+     * @throws IOException IO流异常
+     */
     public void createFile(String content) throws IOException {
         File file = new File("群成员变更记录.md");
-        if (!file.exists()) {
-            file.createNewFile();
-        }
         FileWriter fileWriter = new FileWriter(file.getAbsoluteFile(), true);
         BufferedWriter bw = new BufferedWriter(fileWriter);
         bw.write(content);

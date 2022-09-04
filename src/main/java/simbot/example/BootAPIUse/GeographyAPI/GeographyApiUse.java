@@ -26,8 +26,11 @@ import java.util.Arrays;
 @Service
 public class GeographyApiUse extends Constant {
 
-    @Autowired
     BlackListService blackListService;
+    @Autowired
+    public GeographyApiUse(BlackListService blackListService) {
+        this.blackListService = blackListService;
+    }
 
     /**
      * 调用GeoAPI中的方法
