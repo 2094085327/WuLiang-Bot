@@ -23,7 +23,7 @@ import java.util.*;
 public class CatUtil {
     public static final CatCodeUtil UTILS = CatCodeUtil.getInstance();
     private static final CodeTemplate<Neko> NEKO_TEMPLATE = UTILS.getNekoTemplate();
-    private static final String CODE = Constant.CODE;
+    private static final String CODE = Constant.CODES;
     private static Getter getter;
 
     private CatUtil() {

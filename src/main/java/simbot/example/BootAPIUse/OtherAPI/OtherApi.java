@@ -63,18 +63,28 @@ public class OtherApi extends Constant {
      * @return 返回获取到的P站图片url
      */
 
-    public String twoDimensional() {
+    public String twoDimensional(String tag, String type) {
         int random = (int) (Math.random() * 3);
         String url = "";
-        switch (random) {
-            case 0:
-                url = "https://api.lolicon.app/setu/v2?tag=萝莉|少女&tag=白丝|黑丝";
-                break;
-            case 1:
-            case 2:
-                url = "https://api.lolicon.app/setu/v2?tag=原神&tag=白丝|黑丝";
-                break;
-            default:
+        String urlType1 = "random";
+        String urlType2 = "chose";
+
+        if (urlType1.equals(type)) {
+            switch (random) {
+                case 0:
+                    url = "https://api.lolicon.app/setu/v2?tag=萝莉|少女&tag=白丝|黑丝";
+                    break;
+                case 1:
+                    url = "https://api.lolicon.app/setu/v2?tag=白丝|黑丝";
+                    break;
+                case 2:
+                    url = "https://api.lolicon.app/setu/v2?tag=原神&tag=白丝|黑丝";
+                    break;
+                default:
+            }
+        }
+        if (urlType2.equals(type)) {
+            url = "https://api.lolicon.app/setu/v2?tag=" + tag;
         }
 
         try {

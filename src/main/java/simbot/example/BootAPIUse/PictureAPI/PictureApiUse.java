@@ -2,7 +2,10 @@ package simbot.example.BootAPIUse.PictureAPI;
 
 import catcode.CatCodeUtil;
 import love.forte.simbot.annotation.Filter;
+import love.forte.simbot.annotation.FilterValue;
 import love.forte.simbot.annotation.OnGroup;
+import love.forte.simbot.api.message.MessageContentBuilder;
+import love.forte.simbot.api.message.MessageContentBuilderFactory;
 import love.forte.simbot.api.message.containers.AccountInfo;
 import love.forte.simbot.api.message.containers.GroupInfo;
 import love.forte.simbot.api.message.events.GroupMsg;
@@ -10,15 +13,27 @@ import love.forte.simbot.api.message.events.MessageGet;
 import love.forte.simbot.api.sender.MsgSender;
 import love.forte.simbot.api.sender.Sender;
 import love.forte.simbot.api.sender.Setter;
+import love.forte.simbot.component.mirai.message.MiraiMessageContentBuilder;
+import love.forte.simbot.component.mirai.message.MiraiMessageContentBuilderFactory;
 import love.forte.simbot.filter.MatchType;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 import simbot.example.BootAPIUse.OtherAPI.OtherApi;
 import simbot.example.Service.BlackListService;
+import simbot.example.Util.ContextUtil;
 import simbot.example.core.common.Constant;
 import simbot.example.core.common.TimeTranslate;
 
+import javax.annotation.PostConstruct;
+import java.io.*;
+import java.net.URL;
+import java.net.URLConnection;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Arrays;
+import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -29,14 +44,41 @@ import java.util.concurrent.TimeUnit;
  * @date 2022/7/27 11:38
  * @user 86188
  */
-
 @Service
 public class PictureApiUse extends Constant {
 
+    /**
+     * 注入得到一个消息构建器工厂
+     */
+    private MiraiMessageContentBuilderFactory factory;
+    /**
+     * 合并转发
+     */
+    ApplicationContext applicationContext;
+    /**
+     * 黑名单
+     */
     BlackListService blackListService;
+
+    ContextUtil contextUtil = new ContextUtil();
+
+    /**
+     * 通过自动装配构建消息工厂
+     */
+    MessageContentBuilderFactory messageContentBuilderFactory;
+
     @Autowired
-    public PictureApiUse(BlackListService blackListService) {
+    public PictureApiUse(BlackListService blackListService, ApplicationContext applicationContext, MessageContentBuilderFactory messageContentBuilderFactory) {
         this.blackListService = blackListService;
+        this.applicationContext = applicationContext;
+        this.messageContentBuilderFactory = messageContentBuilderFactory;
+    }
+
+
+    @PostConstruct
+    public void init() {
+        contextUtil.setApplicationContext(applicationContext);
+        factory = ContextUtil.getForwardBuilderFactory();
     }
 
     /**
@@ -54,30 +96,33 @@ public class PictureApiUse extends Constant {
      */
     public OtherApi otherApi = new OtherApi();
 
+    CatCodeUtil util = CatCodeUtil.INSTANCE;
 
     /**
-     * 二刺螈模块
-     * 在收到@时调用P站Api进行链接发送
+     * 二刺螈模块(自定义标签)
+     * 在收到@时调用P站Api进行图片发送
      *
      * @param groupMsg  用于获取群聊消息，群成员信息等
      * @param msgSender 用于在群聊中发送消息
      */
     @OnGroup
-    @Filter(value = "来点好康的", matchType = MatchType.REGEX_MATCHES, trim = true)
-    public void picture(GroupMsg groupMsg, MsgSender msgSender) {
-        MessageGet.MessageFlag<? extends MessageGet.MessageFlagContent> flag1;
-        MessageGet.MessageFlag<? extends MessageGet.MessageFlagContent> flag2;
-
-        Setter setter = msgSender.SETTER;
+    @Filter(value = "来点*{{tag}}涩图", matchType = MatchType.REGEX_MATCHES, trim = true)
+    @Filter(value = "来点好康的*{{tag}}", matchType = MatchType.REGEX_MATCHES, trim = true)
+    public void customizePicture(GroupMsg groupMsg, MsgSender msgSender, @FilterValue("tag") String tag) {
 
         GroupInfo groupInfo = groupMsg.getGroupInfo();
         AccountInfo accountInfo = groupMsg.getAccountInfo();
 
         int groupBanId = (int) Arrays.stream(groupBanIdList).filter(groupInfo.getGroupCode()::contains).count();
 
-        CatCodeUtil util = CatCodeUtil.INSTANCE;
-        String imgMsg = otherApi.twoDimensional();
-        String url = otherApi.url;
+        String imgMsg, url, msg = "来点好康的", nullTag = "点";
+
+        if (nullTag.equals(tag) || msg.equals(groupMsg.getText())) {
+            imgMsg = otherApi.twoDimensional(tag, "random");
+        } else {
+            imgMsg = otherApi.twoDimensional(tag, "chose");
+        }
+        url = otherApi.url;
 
         // 线程池
         THREAD_POOL = new ThreadPoolExecutor(50, 50, 3,
@@ -87,60 +132,100 @@ public class PictureApiUse extends Constant {
             return thread;
         });
 
+        //通过UUID构造文件名
+        String imgName = UUID.randomUUID().toString();
 
-        // 将群号为“637384877”的群排除在人工智能答复模块外
-        if (groupBanId != 1 && blackListService.selectCode(accountInfo.getAccountCode()) == null) {
+        if (groupBanId != 1 && blackListService.selectCode(accountInfo.getAccountCode()) == null && BOOTSTATE) {
             try {
+                loadImg(url, imgName);
 
-                String img = util.toCat("image", true, "file=" + url);
-                String error = util.toCat("image", true, "file=" + "https://gchat.qpic.cn/gchatpic_new/2094085327/2083469072-2232305563-72311C09F00D0DBEF47CF5B070311E46/0?term&#61;2");
+                InputStream inputStream = new FileInputStream(new File("image/" + imgName + ".jpg").getAbsoluteFile());
+
+                // 创建消息构建器，用于在服务器上发送图片
+                MessageContentBuilder messageContentBuilder = messageContentBuilderFactory.getMessageContentBuilder();
+
+                MiraiMessageContentBuilder builder = factory.getMessageContentBuilder();
+                builder.forwardMessage(fun -> {
+                    fun.add(accountInfo, imgMsg);
+                    fun.add(accountInfo, messageContentBuilder.image(inputStream).build());
+                });
 
                 // 创建消息标记
-                flag1 = (MessageGet.MessageFlag<? extends MessageGet.MessageFlagContent>) msgSender.SENDER.sendGroupMsg(groupMsg, imgMsg).get();
-
-                // 创建消息标记
-                flag2 = (MessageGet.MessageFlag<? extends MessageGet.MessageFlagContent>) msgSender.SENDER.sendGroupMsg(groupMsg, img).get();
-
-                MessageGet.MessageFlag<? extends MessageGet.MessageFlagContent> finalFlag = flag2;
+                MessageGet.MessageFlag<? extends MessageGet.MessageFlagContent> flag1 = (MessageGet.MessageFlag<? extends MessageGet.MessageFlagContent>) msgSender.SENDER.sendGroupMsg(groupMsg, builder.build()).get();
+                inputStream.close();
                 THREAD_POOL.execute(() -> {
                     try {
                         // 线程休眠45秒
-                        Thread.sleep(45000);
-                        setter.setMsgRecall(flag1);
-                        setter.setMsgRecall(finalFlag);
+                        Thread.sleep(30000);
+                        msgSender.SETTER.setMsgRecall(flag1);
                     } catch (Exception e) {
-                        // 没有图片时发送图片不见了并准备撤回
-                        // 创建消息标记
-                        MessageGet.MessageFlag<? extends MessageGet.MessageFlagContent>
-                                flag3 = (MessageGet.MessageFlag<? extends MessageGet.MessageFlagContent>) msgSender.SENDER.sendGroupMsg(groupMsg, "啊哦~图片不见了" + face + error).get();
+                        e.printStackTrace();
                         try {
-                            // 线程休眠45秒
-                            Thread.sleep(10000);
-                            setter.setMsgRecall(flag3);
-                        } catch (Exception e2) {
-                            System.out.println("报错");
+                            String error = util.toCat("image", true, "file=" + "https://gchat.qpic.cn/gchatpic_new/2094085327/2083469072-2232305563-72311C09F00D0DBEF47CF5B070311E46/0?term&#61;2");
+
+                            // 创建消息标记,没有图片时发送图片不见了并准备撤回
+                            MiraiMessageContentBuilder builder2 = factory.getMessageContentBuilder();
+                            builder2.forwardMessage(fun -> {
+                                fun.add(accountInfo, imgMsg);
+                                fun.add(accountInfo, "啊哦~图片不见了" + face);
+                                fun.add(accountInfo, error);
+                            });
+
+                            MessageGet.MessageFlag<? extends MessageGet.MessageFlagContent>
+                                    flag2 = (MessageGet.MessageFlag<? extends MessageGet.MessageFlagContent>) msgSender.SENDER.sendGroupMsg(groupMsg, builder2.build()).get();
+
+                            Thread.sleep(30000);
+                            msgSender.SETTER.setMsgRecall(flag2);
+                        } catch (Exception exception) {
+                            e.printStackTrace();
                         }
+                    }
+                    Path path = Paths.get(new File("image/" + imgName + ".jpg").getAbsolutePath());
+                    try {
+                        Files.delete(path);
+                    } catch (IOException e) {
+                        e.printStackTrace();
                     }
                 });
 
             } catch (Exception e) {
-                String img = util.toCat("image", true, "file=" + "https://gchat.qpic.cn/gchatpic_new/2094085327/2083469072-2232305563-72311C09F00D0DBEF47CF5B070311E46/0?term&#61;2");
-
-                // 创建消息标记
-                flag2 = (MessageGet.MessageFlag<? extends MessageGet.MessageFlagContent>) msgSender.SENDER.sendGroupMsg(groupMsg, "啊哦~图片不见了" + face + img).get();
-                MessageGet.MessageFlag<? extends MessageGet.MessageFlagContent> finalFlag1 = flag2;
-                THREAD_POOL.execute(() -> {
-                    try {
-                        // 线程休眠45秒
-                        Thread.sleep(45000);
-                        setter.setMsgRecall(finalFlag1);
-                    } catch (InterruptedException e2) {
-                        msgSender.SENDER.sendGroupMsg(groupMsg, "啊哦~图片不见了" + face + img);
-                    }
-                });
-
+                e.printStackTrace();
             }
         }
+    }
+
+    /**
+     * 缓存图片
+     *
+     * @param url  图片路径
+     * @param name 图片名字
+     * @throws Exception 异常
+     */
+    public void loadImg(String url, String name) throws Exception {
+        // 构造URL
+        URL imgUrl = new URL(url);
+        // 打开连接
+        URLConnection con = imgUrl.openConnection();
+        // 输入流
+        InputStream is = con.getInputStream();
+        // 1K的数据缓冲
+        byte[] bs = new byte[1024];
+        // 读取到的数据长度
+
+        int len;
+
+        // 输出的文件流
+        File file = new File("image/" + name + ".jpg").getAbsoluteFile();
+
+        FileOutputStream os = new FileOutputStream(file, true);
+
+        // 开始读取
+        while ((len = is.read(bs)) != -1) {
+            os.write(bs, 0, len);
+        }
+        // 完毕，关闭所有链接
+        os.close();
+        is.close();
     }
 
     /**

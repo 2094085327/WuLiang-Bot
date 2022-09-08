@@ -22,6 +22,7 @@ public class YuanApi extends YuanConstant {
     public static int finFiveStar;
     public static float finCount;
     public static float poolCount = 3;
+    public static final int PAGE = 9999;
 
     /**
      * 获取解析后的真实URL并加入参数
@@ -75,8 +76,8 @@ public class YuanApi extends YuanConstant {
      * @return 返回检查后的状态
      */
     public static String checkApi(String url) {
-        String urls = toUrl(url);
         try {
+            String urls = toUrl(url);
             // 请求json数据
             String jsonStr = HttpUtil.get(urls);
             JSONObject jsonObject = JSONObject.fromObject(jsonStr);
@@ -98,6 +99,12 @@ public class YuanApi extends YuanConstant {
         return null;
     }
 
+    /**
+     * 角色池信息
+     *
+     * @param url 链接
+     * @throws Exception 异常
+     */
     public static void getGachaRoleInfo(String url) throws Exception {
         Robot r = new Robot();
 
@@ -120,7 +127,7 @@ public class YuanApi extends YuanConstant {
         // 五星角色与对应抽数
         ArrayList<String> fivePeopleCount = new ArrayList<>();
 
-        for (int i = 1; i <= 9999; i++) {
+        for (int i = 1; i <= PAGE; i++) {
             // 接口URL地址
             String urls = YuanApi.getUrl(url, "301", i, endId);
 
@@ -131,8 +138,8 @@ public class YuanApi extends YuanConstant {
 
             // 创建list数组
             String list = data.getString("list");
-            JSONArray jsonArray;
-            jsonArray = new JSONArray(list);
+            JSONArray jsonArray = new JSONArray(list);
+
             // 数组长度
             int length = jsonArray.length();
             // 总抽数
@@ -162,7 +169,8 @@ public class YuanApi extends YuanConstant {
 
                     // 5星
                     fiveStar += 1;
-                    if ("刻晴".equals(name) || "迪卢克".equals(name) || "七七".equals(name) || "琴".equals(name) || "莫娜".equals(name)) {
+                    int banArms = (int) Arrays.stream(permanentInfo).filter(name::contains).count();
+                    if (banArms == 1) {
                         guaranteedCount += 1;
 
                         // 将歪的角色的抽数与姓名加入list
@@ -202,10 +210,7 @@ public class YuanApi extends YuanConstant {
             poolCount--;
         }
 
-
-        finCount += count;
-        finFiveStar += fiveStar;
-        finProbability += probability * (1 / poolCount);
+        getData(count, fiveStar, probability);
 
         picture.rolePole(averageFiveString, String.valueOf(count), fivePeopleCount, String.valueOf(alreadyCost), limited, probability);
 
@@ -236,8 +241,7 @@ public class YuanApi extends YuanConstant {
 
         // 五星角色与对应抽数
         ArrayList<String> fivePeopleCount = new ArrayList<>();
-        int page = 9999;
-        for (int i = 1; i < page; i++) {
+        for (int i = 1; i < PAGE; i++) {
             String newUrl = getUrl(url, "302", i, endId);
             // 请求json数据
             String jsonStr = HttpUtil.get(newUrl);
@@ -246,8 +250,7 @@ public class YuanApi extends YuanConstant {
 
             // 创建list数组
             String list = data.getString("list");
-            JSONArray jsonArray;
-            jsonArray = new JSONArray(list);
+            JSONArray jsonArray = new JSONArray(list);
             // 数组长度
             int length = jsonArray.length();
             // 总抽数
@@ -260,7 +263,6 @@ public class YuanApi extends YuanConstant {
 
             // 获取当前页最后一个数据的id以进行翻页
             endId = jsonArray.getJSONObject(length - 1).getString("id");
-
 
             // 对当前页20个数据进行遍历
             for (int j = 0; j < length; j++) {
@@ -280,7 +282,7 @@ public class YuanApi extends YuanConstant {
                     // 5星
                     fiveStar += 1;
 
-                    int banArms = (int) Arrays.stream(gachaArmsInfo).filter(name::contains).count();
+                    int banArms = (int) Arrays.stream(permanentInfo).filter(name::contains).count();
                     if (banArms == 1) {
                         guaranteedCount += 1;
 
@@ -293,19 +295,17 @@ public class YuanApi extends YuanConstant {
                         // 没歪的角色姓名与抽数
                         fivePeopleCount.add(String.valueOf(fiveGachaCount));
                         fivePeopleCount.add(name);
-
                     }
                     // 将五星计数归零
                     fiveGachaCount = 0;
                 }
             }
-            r.delay(500);
             // 延迟500ms避免被ban
+            r.delay(500);
         }
         fivePeopleCount.add(String.valueOf(fiveGachaCount));
 
         String limited = fiveStar - guaranteedCount + "/" + fiveStar;
-
 
         // 小保底概率
         float guaranteedP = (float) (fiveStar - guaranteedCount) / fiveStar;
@@ -325,9 +325,7 @@ public class YuanApi extends YuanConstant {
 
         picture.armsPole(averageFiveString, String.valueOf(count), fivePeopleCount, String.valueOf(alreadyCost), limited, probability);
 
-        finCount += count;
-        finFiveStar += fiveStar;
-        finProbability += probability * (1 / poolCount);
+        getData(count, fiveStar, probability);
 
         System.out.println("——武器池完成——");
     }
@@ -352,11 +350,10 @@ public class YuanApi extends YuanConstant {
         // 5星个数
         int fiveStar = 0;
 
-
         // 五星角色与对应抽数
         ArrayList<String> fivePeopleCount = new ArrayList<>();
 
-        for (int i = 1; i < 9999; i++) {
+        for (int i = 1; i < PAGE; i++) {
             String newUrl = getUrl(url, "200", i, endId);
 
             // 请求json数据
@@ -366,8 +363,8 @@ public class YuanApi extends YuanConstant {
 
             // 创建list数组
             String list = data.getString("list");
-            JSONArray jsonArray;
-            jsonArray = new JSONArray(list);
+            JSONArray jsonArray = new JSONArray(list);
+
             // 数组长度
             int length = jsonArray.length();
             // 总抽数
@@ -388,7 +385,6 @@ public class YuanApi extends YuanConstant {
                 String rankType = jsonArray.getJSONObject(j).getString("rank_type");
                 // 抽到的物品名
                 String name = jsonArray.getJSONObject(j).getString("name");
-
 
                 if ("5".equals(rankType)) {
 
@@ -427,21 +423,34 @@ public class YuanApi extends YuanConstant {
 
         picture.permanentPool(averageFiveString, String.valueOf(count), fivePeopleCount, String.valueOf(alreadyCost), String.valueOf(fiveStar), probability);
 
-        finCount += count;
-        finFiveStar += fiveStar;
-        finProbability += probability * (1 / poolCount);
+        getData(count, fiveStar, probability);
 
         System.out.println("——常驻池完成——");
 
     }
 
+    /**
+     * 获取全部数据
+     *
+     * @param count       总抽卡数
+     * @param fiveStar    五星数
+     * @param probability 概率
+     */
+    public static void getData(Integer count, Integer fiveStar, double probability) {
+        finCount += count;
+        finFiveStar += fiveStar;
+        finProbability += probability * (1 / poolCount);
+    }
 
+    /**
+     * 获取全部数据并处理
+     *
+     * @throws IOException 输入流异常
+     */
     public static void allData1() throws IOException {
 
         String aveFive = String.format("%.1f", (finCount - finFiveStar) / finFiveStar);
-        System.out.println(aveFive);
         picture.allDataMake(aveFive, String.valueOf(String.format("%.0f", finCount)), String.valueOf(finFiveStar), finProbability);
-
     }
 
     /**
@@ -453,7 +462,4 @@ public class YuanApi extends YuanConstant {
     public static boolean rangeInDefined(double current) {
         return Math.max(0, current) != Math.min(current, 150);
     }
-
-
 }
-

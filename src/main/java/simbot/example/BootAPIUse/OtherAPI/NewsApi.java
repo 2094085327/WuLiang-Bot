@@ -42,17 +42,11 @@ public class NewsApi {
                 for (int length = 0; length < arrayLength; length++) {
                     newsMsg.append(length + 1).append(".").append(jsonArray.getJSONObject(length).getString("title")).append("\n");
                 }
-                newsMsg.append("--------------------------");
+                newsMsg.append("-------------------------");
             }
         } catch (Exception e) {
             newsMsg = new StringBuilder("诶呀新闻没了");
         }
 
     }
-
-
-//    public static void main(String[] args) {
-//        news();
-//        System.out.println(getNewsMsg());
-//    }
 }

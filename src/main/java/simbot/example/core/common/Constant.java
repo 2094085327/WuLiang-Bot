@@ -7,7 +7,18 @@ package simbot.example.core.common;
  */
 @SuppressWarnings("unused")
 public class Constant {
+    public static final String CORE = "core";
     public static final String CODE = "code";
+    public static final String PYTHON = "python";
+    public Constant() {
+    }
+
+    /**
+     * python路径
+     */
+    public static final String PYTHON_PATH ="";
+
+    public static final String CODES = "code";
     public String GROUPID1 = "1019170385";
     public String GROUPID2 = "695525945";
     public String GROUPID3 = "637384877";
@@ -48,6 +59,7 @@ public class Constant {
             "    ④/抱   ⑤/锤\n\n" +
             "4.【抽卡分析】 : 原神抽卡分析 复制到的抽卡链接\n\n" +
             "5.【可达鸭】 : 可达鸭 左侧文字 右侧文字\n\n" +
+            "6.【来点涩图】 : 来点[你的xp]涩图\n\n"+
             "二、无参指令\n" +
             "1.【青年大学习】:\n查看当期青年大学习问题与答案\n\n" +
             "2.【来点好康的】:\n阿姬的珍藏品~\n\n" +
