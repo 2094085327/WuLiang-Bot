@@ -1,14 +1,20 @@
 package simbot.example.Service;
 
+import catcode.CatCodeUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import love.forte.simbot.api.sender.BotSender;
+import love.forte.simbot.bot.Bot;
+import love.forte.simbot.bot.BotManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import simbot.example.BootAPIUse.YuanShenAPI.Sign.CookieStore;
 import simbot.example.BootAPIUse.YuanShenAPI.Sign.GenShinSign;
 import simbot.example.Enity.GenShinUser;
 import simbot.example.Mapper.GenShinMapper;
+import simbot.example.core.common.Constant;
 
+import javax.annotation.Resource;
 import java.util.List;
 
 /**
@@ -18,7 +24,7 @@ import java.util.List;
  * @Description: 原神签到相关服务
  */
 @Service
-public class GenShinService {
+public class GenShinService extends Constant {
 
 
     GenShinMapper genShinMapper;
@@ -31,6 +37,19 @@ public class GenShinService {
         this.genShinMapper = genShinMapper;
         this.genShinSign = genShinSign;
     }
+
+    /**
+     * 构建机器人管理器
+     */
+    @Resource
+    public BotManager manager;
+
+    private void sendGroupMsg(String g, String msg) {
+        Bot bot = manager.getBot(BOOTID1);
+        BotSender bs = bot.getSender();
+        bs.SENDER.sendGroupMsg(g, msg);
+    }
+
 
     /**
      * 根据uid搜索数据
@@ -133,6 +152,11 @@ public class GenShinService {
 
     }
 
+    /**
+     * 展示当前QQ账号所绑定的UID
+     * @param qqid QQ号
+     * @return 返回账号列表
+     */
     public String showMyList(String qqid) {
         QueryWrapper<GenShinUser> queryWrapper = Wrappers.query();
         queryWrapper.like("qqid", qqid);
@@ -155,6 +179,10 @@ public class GenShinService {
         return "[CAT:at,code=" + qqid + "]你还没有绑定账户哦";
     }
 
+    /**
+     * 查看所有绑定的用户UID和昵称
+     * @return 返回要发送的信息
+     */
     public String showAllList() {
 
         QueryWrapper<GenShinUser> queryWrapper = Wrappers.query();
@@ -167,5 +195,40 @@ public class GenShinService {
             msg.append(genShinUser.getUid()).append(" ").append(genShinUser.getNickname()).append("\n");
         }
         return String.valueOf(msg);
+    }
+
+    /**
+     * 通过循环遍历数据库对未删除cookie的用户执行签到操作
+     */
+    public void signAll() {
+        // 构造搜索条件，搜索未删除的cookie
+        QueryWrapper<GenShinUser> queryWrapper = Wrappers.query();
+        queryWrapper.like("deletes", 0);
+
+        List<GenShinUser> genShinUsers1 = genShinMapper.selectList(queryWrapper);
+
+        CatCodeUtil util = CatCodeUtil.INSTANCE;
+        // 取出list中的数据依次进行签到
+        for (GenShinUser genShinUser : genShinUsers1) {
+
+            // 执行签到,同时对当前数据进行初始化
+            if (genShinSign. doSign(selectUid(genShinUser.getUid()))) {
+
+                if (GenShinSign.push == 1) {
+                    // @的人
+                    String atPeople = "[CAT:at,code=" + genShinUser.getQqid() + "]";
+                     sendGroupMsg("1019170385", atPeople + GenShinSign.getMessage());
+
+                    genShinSign. signList(genShinUser.getUid());
+                    System.out.println(GenShinSign.getItemImg());
+
+                      sendGroupMsg("1019170385", GenShinSign.getItemMsg() + "\n" + util.toCat("image", true, "file=" + GenShinSign.getItemImg()));
+                }
+                genShinSign.  signList(genShinUser.getUid());
+
+                sendGroupMsg("140469072", GenShinSign.getItemMsg() + "\n" + util.toCat("image", true, "file=" + GenShinSign.getItemImg()));
+            }
+              sendGroupMsg("140469072", genShinUser.getNickname() + ":" + GenShinSign.getMessage());
+        }
     }
 }

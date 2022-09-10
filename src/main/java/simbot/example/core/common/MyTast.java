@@ -33,11 +33,13 @@ public class MyTast extends Constant {
 
     GenShinService genShinService;
     GenShinMapper genShinMapper;
+   // GenShinSign genShinSign;
 
     @Autowired
-    public MyTast(GenShinService genShinService, GenShinMapper genShinMapper) {
+    public MyTast(GenShinService genShinService, GenShinMapper genShinMapper  /*,GenShinSign genShinSign*/) {
         this.genShinService = genShinService;
         this.genShinMapper = genShinMapper;
+      //  this.genShinSign = genShinSign;
     }
 
 
@@ -48,7 +50,7 @@ public class MyTast extends Constant {
     public BotManager manager;
 
     private void sendGroupMsg(String g, String msg) {
-        Bot bot = manager.getBot("341677404");
+        Bot bot = manager.getBot(BOOTID1);
         BotSender bs = bot.getSender();
         bs.SENDER.sendGroupMsg(g, msg);
     }
@@ -124,37 +126,6 @@ public class MyTast extends Constant {
      */
     @Cron(value = "00 01 00 * * ? *")
     public void genShinSign() {
-        // 构造搜索条件，搜索未删除的cookie
-        QueryWrapper<GenShinUser> queryWrapper = Wrappers.query();
-        queryWrapper.like("deletes", 0);
-
-        List<GenShinUser> genShinUsers1 = genShinMapper.selectList(queryWrapper);
-
-        // 签到类
-        GenShinSign genShinSign = new GenShinSign();
-
-        CatCodeUtil util = CatCodeUtil.INSTANCE;
-        // 取出list中的数据依次进行签到
-        for (GenShinUser genShinUser : genShinUsers1) {
-
-            // 执行签到,同时对当前数据进行初始化
-            if (genShinSign.doSign(genShinService.selectUid(genShinUser.getUid()))) {
-
-                if (GenShinSign.push == 1) {
-                    // @的人
-                    String atPeople = "[CAT:at,code=" + genShinUser.getQqid() + "]";
-                    sendGroupMsg("1019170385", atPeople + GenShinSign.getMessage());
-
-                    genShinSign.signList(genShinUser.getUid());
-                    System.out.println(GenShinSign.getItemImg());
-
-                    sendGroupMsg("1019170385", GenShinSign.getItemMsg() + "\n" + util.toCat("image", true, "file=" + GenShinSign.getItemImg()));
-                }
-                genShinSign.signList(genShinUser.getUid());
-
-                sendGroupMsg("140469072", GenShinSign.getItemMsg() + "\n" + util.toCat("image", true, "file=" + GenShinSign.getItemImg()));
-            }
-            sendGroupMsg("140469072", genShinUser.getNickname() + ":" + GenShinSign.getMessage());
-        }
+        genShinService.signAll();
     }
 }

@@ -5,6 +5,7 @@ import love.forte.simbot.annotation.*;
 import love.forte.simbot.api.message.containers.AccountInfo;
 import love.forte.simbot.api.message.containers.GroupInfo;
 import love.forte.simbot.api.message.events.GroupMsg;
+import love.forte.simbot.api.message.events.MsgGet;
 import love.forte.simbot.api.message.events.PrivateMsg;
 import love.forte.simbot.api.sender.MsgSender;
 import love.forte.simbot.filter.MatchType;
@@ -31,13 +32,15 @@ public class SignApiUse extends Constant {
     /**
      * 自动装配service
      */
-     GenShinService genShinService;
+    GenShinService genShinService;
     BlackListService blackListService;
+    // GenShinSign sign;
 
     @Autowired
-    public SignApiUse(GenShinService genShinService, BlackListService blackListService) {
+    public SignApiUse(GenShinService genShinService, BlackListService blackListService  /*, GenShinSign sign*/) {
         this.genShinService = genShinService;
         this.blackListService = blackListService;
+        //  this.sign = sign;
     }
 
     public GenShinSign sign = new GenShinSign();
@@ -95,21 +98,22 @@ public class SignApiUse extends Constant {
     }
 
     /**
-     * 群聊中绑定的相关指令
+     * 群聊/私聊中绑定的相关指令
      *
-     * @param groupMsg  群聊
+     * @param msgGet    群聊/私聊
      * @param msgSender 消息发送器
      * @param cookie    待绑定的cookie
      */
     @OnGroup
+    @OnPrivate
     @Filter(value = "绑定 *{{cookie}}", matchType = MatchType.REGEX_MATCHES, trim = true)
-    public void genShinBindGroup(GroupMsg groupMsg, MsgSender msgSender, @FilterValue("cookie") String cookie) {
+    public void genShinBindGroup(MsgGet msgGet, MsgSender msgSender, @FilterValue("cookie") String cookie) {
 
         // 获取发送绑定指令人的QQ号，用于后续推送
-        AccountInfo accountInfo = groupMsg.getAccountInfo();
-
+        AccountInfo accountInfo = msgGet.getAccountInfo();
 
         CookieStore cookieStore = new CookieStore();
+
         if (blackListService.selectCode(accountInfo.getAccountCode()) == null && BOOTSTATE) {
             // 对待绑定的cookie进行检查，错误cookie则要求重新获取
             if (cookieStore.checkCookie(cookie)) {
@@ -129,91 +133,72 @@ public class SignApiUse extends Constant {
                     // uid不存在，进行存入
                     genShinService.insertInfo();
                 }
-                msgSender.SENDER.sendGroupMsg(groupMsg, "已为[" + sign.getNickName() + "-" + sign.getUid() + "]绑定cookie\n使用 ”/原神帮助“ 指令来查看能够做到的事情吧~");
-                msgSender.SENDER.sendGroupMsg(groupMsg, "!--你正在通过群聊绑定cookie--!\n" + "!-----建议撤回后通过私聊绑定-----!");
-
-            } else {
-                msgSender.SENDER.sendGroupMsg(groupMsg, "cookie有误，请重新获取");
-            }
-
-        }
-    }
-
-    /**
-     * 私聊绑定cookie
-     *
-     * @param privateMsg 私聊消息
-     * @param msgSender  消息发送
-     * @param cookie     待绑定的cookie
-     */
-    @OnPrivate
-    @Filter(value = "绑定 *{{cookie}}", matchType = MatchType.REGEX_MATCHES, trim = true)
-    public void genShinBindPrivate(PrivateMsg privateMsg, MsgSender msgSender, @FilterValue("cookie") String cookie) {
-
-        // 获取QQ号
-        AccountInfo accountInfo = privateMsg.getAccountInfo();
-
-        CookieStore cookieStore = new CookieStore();
-
-        if (blackListService.selectCode(accountInfo.getAccountCode()) == null && BOOTSTATE) {
-            if (cookieStore.checkCookie(cookie)) {
-                CookieStore.setCookie(cookie);
-                sign.checkUid();
-                if (genShinService.selectUid(sign.getUid()) != null) {
-
-                    System.out.println("uid存在，进行cookie修改");
-                    GenShinSign.qqId = accountInfo.getAccountCode();
-                    CookieStore.setCookie(cookie);
-                    genShinService.upDateInfo();
-
-                } else {
-
-                    genShinService.insertInfo();
-                    System.out.println("uid不存在，进行存入");
+                if (msgGet instanceof GroupMsg) {
+                    GroupMsg groupMsg = (GroupMsg) msgGet;
+                    msgSender.SENDER.sendGroupMsg(groupMsg, "已为[" + sign.getNickName() + "-" + sign.getUid() + "]绑定cookie\n使用 ”/原神帮助“ 指令来查看能够做到的事情吧~");
+                    msgSender.SENDER.sendGroupMsg(groupMsg, "!--你正在通过群聊绑定cookie--!\n" + "!-----建议撤回后通过私聊绑定-----!");
+                }else {
+                    PrivateMsg privateMsg = (PrivateMsg) msgGet;
+                    msgSender.SENDER.sendPrivateMsg(privateMsg, "已为[" + sign.getNickName() + "-" + sign.getUid() + "]绑定cookie\n使用 ”/原神帮助“ 指令来查看能够做到的事情吧~");
                 }
-                msgSender.SENDER.sendPrivateMsg(privateMsg, "已为[" + sign.getNickName() + "-" + sign.getUid() + "]绑定cookie\n使用 ”/原神帮助“ 指令来查看能够做到的事情吧~");
-
-            } else {
-                msgSender.SENDER.sendPrivateMsg(privateMsg, "cookie有误，请重新获取");
+            }else {
+                if (msgGet instanceof GroupMsg) {
+                    GroupMsg groupMsg = (GroupMsg) msgGet;
+                    msgSender.SENDER.sendGroupMsg(groupMsg, "cookie有误，请重新获取");
+                }else {
+                    PrivateMsg privateMsg = (PrivateMsg) msgGet;
+                    msgSender.SENDER.sendPrivateMsg(privateMsg, "cookie有误，请重新获取");
+                }
             }
+
         }
     }
+
 
     /**
      * 获取原神帮助菜单
+     *
+     * @param msgSender 消息发送
+     * @param msgGet    消息父类
+     */
+    @OnGroup
+    @OnPrivate
+    @Filter(value = "/原神帮助", matchType = MatchType.REGEX_MATCHES, trim = true)
+    public void genShinHelpGroup(MsgSender msgSender, MsgGet msgGet) {
+        AccountInfo accountInfo = msgGet.getAccountInfo();
+
+        // 首先对消息类型进行判断，判断后强转
+        if (msgGet instanceof GroupMsg) {
+
+            GroupMsg groupMsg = (GroupMsg) msgGet;
+            GroupInfo groupInfo = groupMsg.getGroupInfo();
+
+            int groupBanId = (int) Arrays.stream(groupBanIdList).filter(groupInfo.getGroupCode()::contains).count();
+
+            if (groupBanId != 1 && blackListService.selectCode(accountInfo.getAccountCode()) == null && BOOTSTATE) {
+                msgSender.SENDER.sendGroupMsg(groupMsg, SignConstant.GENSHIN_HELP);
+            }
+        } else {
+
+            PrivateMsg privateMsg = (PrivateMsg) msgGet;
+
+            if (blackListService.selectCode(accountInfo.getAccountCode()) == null && BOOTSTATE) {
+                msgSender.SENDER.sendPrivateMsg(privateMsg, SignConstant.GENSHIN_HELP);
+            }
+        }
+
+
+    }
+
+    /**
+     * 开启/关闭当前QQ号所绑定的UID签到推送
      *
      * @param groupMsg  群聊
-     * @param msgSender 消息发送
+     * @param msgSender 发送消息
      */
-    @OnGroup
-    @Filter(value = "/原神帮助", matchType = MatchType.REGEX_MATCHES, trim = true)
-    public void genShinHelpGroup(GroupMsg groupMsg, MsgSender msgSender) {
-        GroupInfo groupInfo = groupMsg.getGroupInfo();
-        AccountInfo accountInfo = groupMsg.getAccountInfo();
-
-        int groupBanId = (int) Arrays.stream(groupBanIdList).filter(groupInfo.getGroupCode()::contains).count();
-        if (groupBanId != 1 && blackListService.selectCode(accountInfo.getAccountCode()) == null && BOOTSTATE) {
-            msgSender.SENDER.sendGroupMsg(groupMsg, SignConstant.GENSHIN_HELP);
-        }
-    }
-
-    /**
-     * 获取原神帮助菜单
-     *
-     * @param privateMsg 私聊
-     * @param msgSender  消息发送
-     */
-    @OnPrivate
-    @Filter(value = "/原神帮助", matchType = MatchType.REGEX_MATCHES, trim = true)
-    public void genShinHelpPrivate(PrivateMsg privateMsg, MsgSender msgSender) {
-        AccountInfo accountInfo = privateMsg.getAccountInfo();
-        if (blackListService.selectCode(accountInfo.getAccountCode()) == null && BOOTSTATE) {
-            msgSender.SENDER.sendPrivateMsg(privateMsg, SignConstant.GENSHIN_HELP);
-        }
-    }
-
     @OnGroup
     @Filter(atBot = true, value = "打开推送", matchType = MatchType.REGEX_MATCHES, trim = true)
+    @Filter(atBot = true, value = "关闭推送", matchType = MatchType.REGEX_MATCHES, trim = true)
     public void pushOpen(GroupMsg groupMsg, MsgSender msgSender) {
 
         GroupInfo groupInfo = groupMsg.getGroupInfo();
@@ -224,49 +209,42 @@ public class SignApiUse extends Constant {
             // @的人
             String atPeople = "[CAT:at,code=" + accountInfo.getAccountCode() + "]";
 
+            // 去除消息中的空格
+            // 将中文空格替换为英文空格
+            String msgText = groupMsg.getText();
+            msgText = msgText.trim();
+            msgText = msgText.replace((char) 12288, ' ');
+
             // 检查当前QQ号是否绑定过cookie
             if (genShinService.selectQqId(accountInfo.getAccountCode())) {
 
-                GenShinSign.push = 1;
-                genShinService.upDatePush(accountInfo.getAccountCode());
+                switch (msgText) {
+                    case "打开推送":
+                        GenShinSign.push = 1;
 
-                msgSender.SENDER.sendGroupMsg(groupMsg, atPeople + "推送打开了！");
+                        msgSender.SENDER.sendGroupMsg(groupMsg, atPeople + "推送打开了！");
+                        genShinService.upDatePush(accountInfo.getAccountCode());
+                        break;
+                    case "关闭推送":
+                        GenShinSign.push = 0;
+                        genShinService.upDatePush(accountInfo.getAccountCode());
+                        msgSender.SENDER.sendGroupMsg(groupMsg, atPeople + "推送关闭了！");
+                        break;
+                    default:
+                }
             } else {
 
-                msgSender.SENDER.sendGroupMsg(groupMsg, atPeople + "你还没有绑定过原神cookie，不需要打开推送");
+                msgSender.SENDER.sendGroupMsg(groupMsg, atPeople + "你还没有绑定过原神cookie，不需要打开/关闭推送");
             }
 
         }
     }
 
-    @OnGroup
-    @Filter(atBot = true, value = "关闭推送", matchType = MatchType.REGEX_MATCHES, trim = true)
-    public void pushOff(GroupMsg groupMsg, MsgSender msgSender) {
-
-        GroupInfo groupInfo = groupMsg.getGroupInfo();
-        AccountInfo accountInfo = groupMsg.getAccountInfo();
-
-        int groupBanId = (int) Arrays.stream(groupBanIdList).filter(groupInfo.getGroupCode()::contains).count();
-
-        if (groupBanId != 1 && blackListService.selectCode(accountInfo.getAccountCode()) == null && BOOTSTATE) {
-            // @的人
-            String atPeople = "[CAT:at,code=" + accountInfo.getAccountCode() + "]";
-            if (genShinService.selectQqId(accountInfo.getAccountCode())) {
-
-                GenShinSign.push = 0;
-                genShinService.upDatePush(accountInfo.getAccountCode());
-                msgSender.SENDER.sendGroupMsg(groupMsg, atPeople + "推送关闭了！");
-            } else {
-
-                msgSender.SENDER.sendGroupMsg(groupMsg, atPeople + "你还没有绑定过原神cookie，不需要关闭推送");
-            }
-        }
-    }
 
     /**
      * 随便给分组取个名字啥的
      */
-    private static final String DELETE_GROUP = "==tellMeYourNameAndPhone==PHONE==";
+    private static final String DELETE_GROUP = "==ChoseDeleteOrNot==DELETE==";
 
     /**
      * 监听群聊，触发启动事件。
@@ -365,6 +343,12 @@ public class SignApiUse extends Constant {
 
     }
 
+    /**
+     * 对当前QQ号进行uid与昵称查询
+     *
+     * @param groupMsg  群聊
+     * @param msgSender 发送消息
+     */
     @OnGroup
     @Filter(value = "账号查询")
     public void showList(GroupMsg groupMsg, MsgSender msgSender) {
@@ -378,6 +362,12 @@ public class SignApiUse extends Constant {
         }
     }
 
+    /**
+     * 通过管理员权限对所有列表进行查询
+     *
+     * @param groupMsg  群聊
+     * @param msgSender 发送消息
+     */
     @OnGroup
     @Filter(value = "管理查询")
     public void showAllList(GroupMsg groupMsg, MsgSender msgSender) {
@@ -386,6 +376,22 @@ public class SignApiUse extends Constant {
 
         if (accountInfo.getAccountCode().equals(USERID1)) {
             msgSender.SENDER.sendGroupMsg(groupMsg, genShinService.showAllList());
+        }
+    }
+
+    /**
+     * 判断管理员权限并进行全部重新签到的操作
+     *
+     * @param groupMsg 群聊消息
+     */
+    @OnGroup
+    @Filter(value = "全部重签")
+    public void reSignAll(GroupMsg groupMsg) {
+
+        AccountInfo accountInfo = groupMsg.getAccountInfo();
+
+        if (accountInfo.getAccountCode().equals(USERID1)) {
+            genShinService.signAll();
         }
     }
 

@@ -3,7 +3,9 @@ package simbot.example.BootAPIUse.YuanShenAPI.Sign;
 
 import com.alibaba.fastjson.JSONObject;
 import org.json.JSONArray;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import simbot.example.Mapper.GenShinMapper;
 import simbot.example.Util.HttpUtils;
 
 import java.util.HashMap;
@@ -78,6 +80,16 @@ public class GenShinSign {
     }
 
     CookieStore cookieStore = new CookieStore();
+
+    GenShinMapper genShinMapper;
+
+    @Autowired
+    public GenShinSign(GenShinMapper genShinMapper) {
+        this.genShinMapper = genShinMapper;
+    }
+
+    public GenShinSign() {
+    }
 
     /**
      * 获取cookie对应的Uid
@@ -175,5 +187,4 @@ public class GenShinSign {
         setItemMsg("今天获取的奖励是:[" + itemName + "X" + itemCnt + "]");
         setItemImg(img);
     }
-
 }
