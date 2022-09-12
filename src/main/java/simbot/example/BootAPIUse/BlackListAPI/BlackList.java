@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import simbot.example.Service.BlackListService;
 import simbot.example.core.common.Constant;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 
 /**
@@ -27,11 +28,13 @@ public class BlackList extends Constant {
     /**
      * 自动装配service
      */
-
+    public static ArrayList<String> blackList;
     BlackListService blackListService;
+
     @Autowired
     public BlackList(BlackListService blackListService) {
         this.blackListService = blackListService;
+        blackList = blackListService.blackList();
     }
 
     public BlackList() {
@@ -66,7 +69,6 @@ public class BlackList extends Constant {
     }
 
 
-
     /**
      * 加入黑名单，禁用一切功能
      *
@@ -93,15 +95,16 @@ public class BlackList extends Constant {
                 // 检查次cookie对应的UID是否已经存在
                 if (blackListService.selectCode(code) != null) {
 
-                    // uid存在，进行cookie修改
-
                     blackListService.updateBlackList();
+                    blackList.add(code);
+
                     msgSender.SENDER.sendGroupMsg(groupMsg, "已将" + code + "加入黑名单");
                     System.out.println("存在");
                 } else {
 
                     // uid不存在，进行存入
                     blackListService.insertInfo(code, nickName);
+
                     msgSender.SENDER.sendGroupMsg(groupMsg, "已将" + code + "加入黑名单");
                     System.out.println("不存在");
                 }
@@ -128,6 +131,8 @@ public class BlackList extends Constant {
                 // uid存在，进行cookie修改
 
                 blackListService.deleteBlackList(code);
+                blackList.remove(code);
+
                 msgSender.SENDER.sendGroupMsg(groupMsg, "已将" + code + "移出黑名单");
                 System.out.println("存在");
             } else {

@@ -62,7 +62,6 @@ public class OtherApi extends Constant {
      *
      * @return 返回获取到的P站图片url
      */
-
     public String twoDimensional(String tag, String type) {
         int random = (int) (Math.random() * 3);
         String url = "";

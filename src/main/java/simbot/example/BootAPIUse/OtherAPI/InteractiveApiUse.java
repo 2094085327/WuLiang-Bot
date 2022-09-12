@@ -6,11 +6,11 @@ import love.forte.simbot.annotation.OnGroup;
 import love.forte.simbot.api.message.containers.AccountInfo;
 import love.forte.simbot.api.message.events.GroupMsg;
 import love.forte.simbot.api.sender.MsgSender;
-import love.forte.simbot.api.sender.Sender;
 import love.forte.simbot.filter.MatchType;
 import org.springframework.stereotype.Service;
-import simbot.example.core.common.Constant;
 import simbot.example.Util.CatUtil;
+import simbot.example.core.common.Constant;
+import simbot.example.core.common.JudgeBan;
 
 
 /**
@@ -20,6 +20,12 @@ import simbot.example.Util.CatUtil;
  */
 @Service
 public class InteractiveApiUse extends Constant {
+
+    /**
+     * 通过猫猫码发送图片
+     */
+    CatCodeUtil util = CatCodeUtil.INSTANCE;
+    JudgeBan judgeBan = new JudgeBan();
 
     /**
      * 互动模块-丢
@@ -34,22 +40,21 @@ public class InteractiveApiUse extends Constant {
     public void diu(GroupMsg groupMsg, MsgSender msgSender) {
 
         DiuProvider diuProvider = DiuProvider.DIU;
-        Sender sender = msgSender.SENDER;
         AccountInfo accountInfo = groupMsg.getAccountInfo();
 
-        // 通过猫猫码发送图片
-        CatCodeUtil util = CatCodeUtil.INSTANCE;
+        if (judgeBan.allBan(groupMsg)) {
 
-        try {
-            String msg = util.toCat("image", true, "file="
-                    + diuProvider + CatUtil.getAt(groupMsg.getMsg()));
-            sender.sendGroupMsg(groupMsg, msg);
-        } catch (Exception e) {
-            String atMe = "[CAT:at,code=2094085327]";
-            String face = "[CAT:face,id=5]";
-            String atOther = "[CAT:at,code=" + accountInfo.getAccountCode() + "]";
-            sender.sendGroupMsg(groupMsg, atOther + "姬姬丢不出来" + face);
-            sender.sendGroupMsg(groupMsg, atMe + "快来看看你接口是不是炸了！");
+            try {
+                String msg = util.toCat("image", true, "file="
+                        + diuProvider + CatUtil.getAt(groupMsg.getMsg()));
+                msgSender.SENDER.sendGroupMsg(groupMsg, msg);
+            } catch (Exception e) {
+                String atMe = "[CAT:at,code=2094085327]";
+                String face = "[CAT:face,id=5]";
+                String atOther = "[CAT:at,code=" + accountInfo.getAccountCode() + "]";
+                msgSender.SENDER.sendGroupMsg(groupMsg, atOther + "姬姬丢不出来" + face);
+                msgSender.SENDER.sendGroupMsg(groupMsg, atMe + "快来看看你接口是不是炸了！");
+            }
         }
     }
 
@@ -64,16 +69,13 @@ public class InteractiveApiUse extends Constant {
     public void pai(GroupMsg groupMsg, MsgSender msgSender) {
 
         DiuProvider diuProvider = DiuProvider.PAI;
-        Sender sender = msgSender.SENDER;
 
-        CatCodeUtil util = CatCodeUtil.INSTANCE;
-        String msg = util.toCat("image", true, "file="
-                + diuProvider + CatUtil.getAt(groupMsg.getMsg()));
-        /*
-         */
-
-
-        sender.sendGroupMsg(groupMsg, msg);
+        if (judgeBan.allBan(groupMsg)) {
+            CatCodeUtil util = CatCodeUtil.INSTANCE;
+            String msg = util.toCat("image", true, "file="
+                    + diuProvider + CatUtil.getAt(groupMsg.getMsg()));
+            msgSender.SENDER.sendGroupMsg(groupMsg, msg);
+        }
     }
 
     /**
@@ -87,25 +89,21 @@ public class InteractiveApiUse extends Constant {
     public void grab(GroupMsg groupMsg, MsgSender msgSender) {
 
         DiuProvider diuProvider = DiuProvider.GRAB;
-        Sender sender = msgSender.SENDER;
         AccountInfo accountInfo = groupMsg.getAccountInfo();
 
-        CatCodeUtil util = CatCodeUtil.INSTANCE;
-        try {
-            String msg = util.toCat("image", true, "file="
-                    + diuProvider + CatUtil.getAt(groupMsg.getMsg()));
-            sender.sendGroupMsg(groupMsg, msg);
-        } catch (Exception e) {
-            String atMe = "[CAT:at,code=2094085327]";
-            String face = "[CAT:face,id=5]";
-            String atOther = "[CAT:at,code=" + accountInfo.getAccountCode() + "]";
+        if (judgeBan.allBan(groupMsg)) {
+            try {
+                String msg = util.toCat("image", true, "file=" + diuProvider + CatUtil.getAt(groupMsg.getMsg()));
+                msgSender.SENDER.sendGroupMsg(groupMsg, msg);
+            } catch (Exception e) {
+                String atMe = "[CAT:at,code=2094085327]";
+                String face = "[CAT:face,id=5]";
+                String atOther = "[CAT:at,code=" + accountInfo.getAccountCode() + "]";
 
-            sender.sendGroupMsg(groupMsg, atOther + "姬姬抓不到" + face);
-            sender.sendGroupMsg(groupMsg, atMe + "快来看看你接口是不是炸了！");
-
+                msgSender.SENDER.sendGroupMsg(groupMsg, atOther + "姬姬抓不到" + face);
+                msgSender.SENDER.sendGroupMsg(groupMsg, atMe + "快来看看你接口是不是炸了！");
+            }
         }
-
-
     }
 
     /**
@@ -119,22 +117,21 @@ public class InteractiveApiUse extends Constant {
     public void bao(GroupMsg groupMsg, MsgSender msgSender) {
 
         DiuProvider diuProvider = DiuProvider.BAO;
-        Sender sender = msgSender.SENDER;
         AccountInfo accountInfo = groupMsg.getAccountInfo();
 
-        CatCodeUtil util = CatCodeUtil.INSTANCE;
+        if (judgeBan.allBan(groupMsg)) {
 
-        try {
-            String msg = util.toCat("image", true, "file="
-                    + diuProvider + CatUtil.getAt(groupMsg.getMsg()));
-            sender.sendGroupMsg(groupMsg, msg);
-        } catch (Exception e) {
-            String atMe = "[CAT:at,code=2094085327]";
-            String atOther = "[CAT:at,code=" + accountInfo.getAccountCode() + "]";
+            try {
+                String msg = util.toCat("image", true, "file="
+                        + diuProvider + CatUtil.getAt(groupMsg.getMsg()));
+                msgSender.SENDER.sendGroupMsg(groupMsg, msg);
+            } catch (Exception e) {
+                String atMe = "[CAT:at,code=2094085327]";
+                String atOther = "[CAT:at,code=" + accountInfo.getAccountCode() + "]";
 
-            sender.sendGroupMsg(groupMsg, atOther + "姬姬抱不到" + face);
-            sender.sendGroupMsg(groupMsg, atMe + "快来看看你接口是不是炸了！");
-
+                msgSender.SENDER.sendGroupMsg(groupMsg, atOther + "姬姬抱不到" + face);
+                msgSender.SENDER.sendGroupMsg(groupMsg, atMe + "快来看看你接口是不是炸了！");
+            }
         }
     }
 
@@ -149,25 +146,24 @@ public class InteractiveApiUse extends Constant {
     public void pound(GroupMsg groupMsg, MsgSender msgSender) {
 
         DiuProvider diuProvider = DiuProvider.POUND;
-        Sender sender = msgSender.SENDER;
+
         AccountInfo accountInfo = groupMsg.getAccountInfo();
 
-        CatCodeUtil util = CatCodeUtil.INSTANCE;
+        if (judgeBan.allBan(groupMsg)) {
+            try {
+                String msg = util.toCat("image", true, "file="
+                        + diuProvider + CatUtil.getAt(groupMsg.getMsg()));
+                msgSender.SENDER.sendGroupMsg(groupMsg, msg);
+            } catch (Exception e) {
+                String atMe = "[CAT:at,code=2094085327]";
+                String face = "[CAT:face,id=5]";
+                String atOther = "[CAT:at,code=" + accountInfo.getAccountCode() + "]";
 
-        try {
-            String msg = util.toCat("image", true, "file="
-                    + diuProvider + CatUtil.getAt(groupMsg.getMsg()));
-            sender.sendGroupMsg(groupMsg, msg);
-        } catch (Exception e) {
-            String atMe = "[CAT:at,code=2094085327]";
-            String face = "[CAT:face,id=5]";
-            String atOther = "[CAT:at,code=" + accountInfo.getAccountCode() + "]";
+                msgSender.SENDER.sendGroupMsg(groupMsg, atOther + "姬姬锤不到" + face);
+                msgSender.SENDER.sendGroupMsg(groupMsg, atMe + "快来看看你接口是不是炸了！");
 
-            sender.sendGroupMsg(groupMsg, atOther + "姬姬锤不到" + face);
-            sender.sendGroupMsg(groupMsg, atMe + "快来看看你接口是不是炸了！");
-
+            }
         }
     }
-
 }
 

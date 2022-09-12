@@ -7,12 +7,9 @@ import love.forte.simbot.annotation.OnGroup;
 import love.forte.simbot.api.message.MessageContentBuilder;
 import love.forte.simbot.api.message.MessageContentBuilderFactory;
 import love.forte.simbot.api.message.containers.AccountInfo;
-import love.forte.simbot.api.message.containers.GroupInfo;
 import love.forte.simbot.api.message.events.GroupMsg;
 import love.forte.simbot.api.message.events.MessageGet;
 import love.forte.simbot.api.sender.MsgSender;
-import love.forte.simbot.api.sender.Sender;
-import love.forte.simbot.api.sender.Setter;
 import love.forte.simbot.component.mirai.message.MiraiMessageContentBuilder;
 import love.forte.simbot.component.mirai.message.MiraiMessageContentBuilderFactory;
 import love.forte.simbot.filter.MatchType;
@@ -23,6 +20,7 @@ import simbot.example.BootAPIUse.OtherAPI.OtherApi;
 import simbot.example.Service.BlackListService;
 import simbot.example.Util.ContextUtil;
 import simbot.example.core.common.Constant;
+import simbot.example.core.common.JudgeBan;
 import simbot.example.core.common.TimeTranslate;
 
 import javax.annotation.PostConstruct;
@@ -32,7 +30,6 @@ import java.net.URLConnection;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Arrays;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -61,6 +58,8 @@ public class PictureApiUse extends Constant {
     BlackListService blackListService;
 
     ContextUtil contextUtil = new ContextUtil();
+    JudgeBan judgeBan = new JudgeBan();
+    CatCodeUtil util = CatCodeUtil.INSTANCE;
 
     /**
      * 通过自动装配构建消息工厂
@@ -96,8 +95,6 @@ public class PictureApiUse extends Constant {
      */
     public OtherApi otherApi = new OtherApi();
 
-    CatCodeUtil util = CatCodeUtil.INSTANCE;
-
     /**
      * 二刺螈模块(自定义标签)
      * 在收到@时调用P站Api进行图片发送
@@ -110,10 +107,7 @@ public class PictureApiUse extends Constant {
     @Filter(value = "来点好康的*{{tag}}", matchType = MatchType.REGEX_MATCHES, trim = true)
     public void customizePicture(GroupMsg groupMsg, MsgSender msgSender, @FilterValue("tag") String tag) {
 
-        GroupInfo groupInfo = groupMsg.getGroupInfo();
         AccountInfo accountInfo = groupMsg.getAccountInfo();
-
-        int groupBanId = (int) Arrays.stream(groupBanIdList).filter(groupInfo.getGroupCode()::contains).count();
 
         String imgMsg, url, msg = "来点好康的", nullTag = "点";
 
@@ -135,7 +129,7 @@ public class PictureApiUse extends Constant {
         //通过UUID构造文件名
         String imgName = UUID.randomUUID().toString();
 
-        if (groupBanId != 1 && blackListService.selectCode(accountInfo.getAccountCode()) == null && BOOTSTATE) {
+        if (judgeBan.allBan(groupMsg)) {
             try {
                 loadImg(url, imgName);
 
@@ -239,21 +233,12 @@ public class PictureApiUse extends Constant {
     @Filter(value = "看看动漫", matchType = MatchType.REGEX_MATCHES, trim = true)
     public void picture2(GroupMsg groupMsg, MsgSender msgSender) {
 
-        Setter setter = msgSender.SETTER;
-
-        CatCodeUtil util = CatCodeUtil.INSTANCE;
         String msg = util.toCat("image", true, "file="
                 + "https://www.dmoe.cc/random.php");
 
-        Sender sender = msgSender.SENDER;
-
-        GroupInfo groupInfo = groupMsg.getGroupInfo();
-        AccountInfo accountInfo = groupMsg.getAccountInfo();
-
-        int groupBanId = (int) Arrays.stream(groupBanIdList).filter(groupInfo.getGroupCode()::contains).count();
         try {
             // 将群号为“637384877”的群排除在人工智能答复模块外
-            if (groupBanId != 1 && blackListService.selectCode(accountInfo.getAccountCode()) == null) {
+            if (judgeBan.allBan(groupMsg)) {
 
                 // 消息标记
                 MessageGet.MessageFlag<? extends MessageGet.MessageFlagContent>
@@ -274,7 +259,7 @@ public class PictureApiUse extends Constant {
                     try {
                         // 线程休眠45秒
                         Thread.sleep(45000);
-                        setter.setMsgRecall(flag);
+                        msgSender.SETTER.setMsgRecall(flag);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
@@ -282,7 +267,7 @@ public class PictureApiUse extends Constant {
             }
 
         } catch (Exception e) {
-            sender.sendGroupMsg(groupMsg, "超时了哦~");
+            msgSender.SENDER.sendGroupMsg(groupMsg, "超时了哦~");
         }
     }
 
@@ -297,27 +282,16 @@ public class PictureApiUse extends Constant {
     @Filter(value = "来点原神", matchType = MatchType.REGEX_MATCHES, trim = true)
     public void yuanShen(GroupMsg groupMsg, MsgSender msgSender) {
 
-        CatCodeUtil util = CatCodeUtil.INSTANCE;
         String msg = util.toCat("image", true, "file="
                 + "https://api.dujin.org/pic/yuanshen/");
 
-        Sender sender = msgSender.SENDER;
-        Setter setter = msgSender.SETTER;
-
-        GroupInfo groupInfo = groupMsg.getGroupInfo();
-        AccountInfo accountInfo = groupMsg.getAccountInfo();
-
-        int groupBanId = (int) Arrays.stream(groupBanIdList).filter(groupInfo.getGroupCode()::contains).count();
-
         try {
             // 将群号为“637384877”的群排除在人工智能答复模块外
-            if (groupBanId != 1 && blackListService.selectCode(accountInfo.getAccountCode()) == null) {
+            if (judgeBan.allBan(groupMsg)) {
 
                 // 消息标记
                 MessageGet.MessageFlag<? extends MessageGet.MessageFlagContent>
                         flag = (MessageGet.MessageFlag<? extends MessageGet.MessageFlagContent>) msgSender.SENDER.sendGroupMsg(groupMsg, msg).get();
-
-                System.out.println(flag);
 
                 // 线程池
                 THREAD_POOL = new ThreadPoolExecutor(50, 50, 3,
@@ -332,7 +306,7 @@ public class PictureApiUse extends Constant {
                     try {
                         // 线程休眠45秒
                         Thread.sleep(45000);
-                        setter.setMsgRecall(flag);
+                        msgSender.SETTER.setMsgRecall(flag);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
@@ -340,7 +314,7 @@ public class PictureApiUse extends Constant {
             }
 
         } catch (Exception e) {
-            sender.sendGroupMsg(groupMsg, "超时了哦~");
+            msgSender.SENDER.sendGroupMsg(groupMsg, "超时了哦~");
         }
     }
 

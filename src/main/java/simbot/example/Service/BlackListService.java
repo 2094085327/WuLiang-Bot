@@ -8,18 +8,20 @@ import simbot.example.BootAPIUse.BlackListAPI.BlackList;
 import simbot.example.Enity.BlackListUser;
 import simbot.example.Mapper.BlackListMapper;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
  * @Author zeng
  * @Date 2022/8/30 16:14
  * @User 86188
- * @Description:
+ * @Description: 黑名单service层
  */
 @Service
 public class BlackListService {
 
     BlackListMapper blackListMapper;
+
     @Autowired
     public BlackListService(BlackListMapper blackListMapper) {
         this.blackListMapper = blackListMapper;
@@ -56,6 +58,19 @@ public class BlackListService {
             return blackListUser.getCode();
         }
         return null;
+    }
+
+    public ArrayList<String> blackList() {
+        List<BlackListUser> blackListUsers = blackListMapper.selectList(null);
+        ArrayList<String> list = new ArrayList<>();
+        if (blackListUsers != null) {
+            for (BlackListUser listUser : blackListUsers) {
+                list.add(listUser.getCode());
+            }
+        } else {
+            list.add("0000000000");
+        }
+        return list;
     }
 
     /**

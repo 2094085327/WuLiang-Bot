@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 import simbot.example.Service.BlackListService;
 import simbot.example.Service.GenShinService;
 import simbot.example.core.common.Constant;
+import simbot.example.core.common.JudgeBan;
 
 import java.util.Arrays;
 
@@ -34,7 +35,7 @@ public class SignApiUse extends Constant {
      */
     GenShinService genShinService;
     BlackListService blackListService;
-    // GenShinSign sign;
+
 
     @Autowired
     public SignApiUse(GenShinService genShinService, BlackListService blackListService  /*, GenShinSign sign*/) {
@@ -44,6 +45,7 @@ public class SignApiUse extends Constant {
     }
 
     public GenShinSign sign = new GenShinSign();
+    JudgeBan judgeBan = new JudgeBan();
 
     /**
      * 信息检查
@@ -67,7 +69,7 @@ public class SignApiUse extends Constant {
     public void genShinSign(GroupMsg groupMsg, MsgSender msgSender, @FilterValue("uid") String uid) {
         AccountInfo accountInfo = groupMsg.getAccountInfo();
         String nowQqId = accountInfo.getAccountCode();
-        if (blackListService.selectCode(nowQqId) == null && BOOTSTATE) {
+        if (judgeBan.allBan(groupMsg)) {
             if (noInfo(uid)) {
                 // 获取QQ号
 
@@ -114,7 +116,7 @@ public class SignApiUse extends Constant {
 
         CookieStore cookieStore = new CookieStore();
 
-        if (blackListService.selectCode(accountInfo.getAccountCode()) == null && BOOTSTATE) {
+        if (judgeBan.allBan(msgGet)) {
             // 对待绑定的cookie进行检查，错误cookie则要求重新获取
             if (cookieStore.checkCookie(cookie)) {
                 CookieStore.setCookie(cookie);
@@ -137,15 +139,15 @@ public class SignApiUse extends Constant {
                     GroupMsg groupMsg = (GroupMsg) msgGet;
                     msgSender.SENDER.sendGroupMsg(groupMsg, "已为[" + sign.getNickName() + "-" + sign.getUid() + "]绑定cookie\n使用 ”/原神帮助“ 指令来查看能够做到的事情吧~");
                     msgSender.SENDER.sendGroupMsg(groupMsg, "!--你正在通过群聊绑定cookie--!\n" + "!-----建议撤回后通过私聊绑定-----!");
-                }else {
+                } else {
                     PrivateMsg privateMsg = (PrivateMsg) msgGet;
                     msgSender.SENDER.sendPrivateMsg(privateMsg, "已为[" + sign.getNickName() + "-" + sign.getUid() + "]绑定cookie\n使用 ”/原神帮助“ 指令来查看能够做到的事情吧~");
                 }
-            }else {
+            } else {
                 if (msgGet instanceof GroupMsg) {
                     GroupMsg groupMsg = (GroupMsg) msgGet;
                     msgSender.SENDER.sendGroupMsg(groupMsg, "cookie有误，请重新获取");
-                }else {
+                } else {
                     PrivateMsg privateMsg = (PrivateMsg) msgGet;
                     msgSender.SENDER.sendPrivateMsg(privateMsg, "cookie有误，请重新获取");
                 }
@@ -166,28 +168,27 @@ public class SignApiUse extends Constant {
     @Filter(value = "/原神帮助", matchType = MatchType.REGEX_MATCHES, trim = true)
     public void genShinHelpGroup(MsgSender msgSender, MsgGet msgGet) {
         AccountInfo accountInfo = msgGet.getAccountInfo();
+        if (judgeBan.allBan(msgGet)) {
+            // 首先对消息类型进行判断，判断后强转
+            if (msgGet instanceof GroupMsg) {
 
-        // 首先对消息类型进行判断，判断后强转
-        if (msgGet instanceof GroupMsg) {
+                GroupMsg groupMsg = (GroupMsg) msgGet;
+                GroupInfo groupInfo = groupMsg.getGroupInfo();
 
-            GroupMsg groupMsg = (GroupMsg) msgGet;
-            GroupInfo groupInfo = groupMsg.getGroupInfo();
+                int groupBanId = (int) Arrays.stream(groupBanIdList).filter(groupInfo.getGroupCode()::contains).count();
 
-            int groupBanId = (int) Arrays.stream(groupBanIdList).filter(groupInfo.getGroupCode()::contains).count();
+                if (groupBanId != 1 && blackListService.selectCode(accountInfo.getAccountCode()) == null && BOOTSTATE) {
+                    msgSender.SENDER.sendGroupMsg(groupMsg, SignConstant.GENSHIN_HELP);
+                }
+            } else {
 
-            if (groupBanId != 1 && blackListService.selectCode(accountInfo.getAccountCode()) == null && BOOTSTATE) {
-                msgSender.SENDER.sendGroupMsg(groupMsg, SignConstant.GENSHIN_HELP);
-            }
-        } else {
+                PrivateMsg privateMsg = (PrivateMsg) msgGet;
 
-            PrivateMsg privateMsg = (PrivateMsg) msgGet;
-
-            if (blackListService.selectCode(accountInfo.getAccountCode()) == null && BOOTSTATE) {
-                msgSender.SENDER.sendPrivateMsg(privateMsg, SignConstant.GENSHIN_HELP);
+                if (blackListService.selectCode(accountInfo.getAccountCode()) == null && BOOTSTATE) {
+                    msgSender.SENDER.sendPrivateMsg(privateMsg, SignConstant.GENSHIN_HELP);
+                }
             }
         }
-
-
     }
 
     /**
@@ -201,11 +202,9 @@ public class SignApiUse extends Constant {
     @Filter(atBot = true, value = "关闭推送", matchType = MatchType.REGEX_MATCHES, trim = true)
     public void pushOpen(GroupMsg groupMsg, MsgSender msgSender) {
 
-        GroupInfo groupInfo = groupMsg.getGroupInfo();
         AccountInfo accountInfo = groupMsg.getAccountInfo();
 
-        int groupBanId = (int) Arrays.stream(groupBanIdList).filter(groupInfo.getGroupCode()::contains).count();
-        if (groupBanId != 1 && blackListService.selectCode(accountInfo.getAccountCode()) == null && BOOTSTATE) {
+        if (judgeBan.allBan(groupMsg)) {
             // @的人
             String atPeople = "[CAT:at,code=" + accountInfo.getAccountCode() + "]";
 
@@ -258,12 +257,7 @@ public class SignApiUse extends Constant {
     @Filter(value = "删除cookie *{{uid}}", matchType = MatchType.REGEX_MATCHES, trim = true)
     public void start(GroupMsg groupMsg, ListenerContext context, MsgSender sender, @FilterValue("uid") String uid) {
 
-        GroupInfo groupInfo = groupMsg.getGroupInfo();
-        AccountInfo accountInfo = groupMsg.getAccountInfo();
-
-        int groupBanId = (int) Arrays.stream(groupBanIdList).filter(groupInfo.getGroupCode()::contains).count();
-
-        if (groupBanId != 1 && blackListService.selectCode(accountInfo.getAccountCode()) == null && BOOTSTATE) {
+        if (judgeBan.allBan(groupMsg)) {
 
             // 得到session上下文，并断言它的确不是null
             final ContinuousSessionScopeContext sessionContext = (ContinuousSessionScopeContext) context.getContext(ListenerContext.Scope.CONTINUOUS_SESSION);
@@ -352,12 +346,10 @@ public class SignApiUse extends Constant {
     @OnGroup
     @Filter(value = "账号查询")
     public void showList(GroupMsg groupMsg, MsgSender msgSender) {
-        GroupInfo groupInfo = groupMsg.getGroupInfo();
+
         AccountInfo accountInfo = groupMsg.getAccountInfo();
 
-        int groupBanId = (int) Arrays.stream(groupBanIdList).filter(groupInfo.getGroupCode()::contains).count();
-
-        if (groupBanId != 1 && blackListService.selectCode(accountInfo.getAccountCode()) == null && BOOTSTATE) {
+        if (judgeBan.allBan(groupMsg)) {
             msgSender.SENDER.sendGroupMsg(groupMsg, genShinService.showMyList(accountInfo.getAccountCode()));
         }
     }

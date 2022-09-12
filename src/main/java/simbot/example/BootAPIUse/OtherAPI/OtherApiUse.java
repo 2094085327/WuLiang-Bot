@@ -5,21 +5,17 @@ import love.forte.simbot.annotation.FilterValue;
 import love.forte.simbot.annotation.OnGroup;
 import love.forte.simbot.api.message.MessageContentBuilder;
 import love.forte.simbot.api.message.MessageContentBuilderFactory;
-import love.forte.simbot.api.message.containers.AccountInfo;
-import love.forte.simbot.api.message.containers.GroupInfo;
 import love.forte.simbot.api.message.events.GroupMsg;
 import love.forte.simbot.api.message.events.MessageGet;
 import love.forte.simbot.api.sender.MsgSender;
-import love.forte.simbot.api.sender.Sender;
-import love.forte.simbot.api.sender.Setter;
 import love.forte.simbot.filter.MatchType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import simbot.example.Service.BlackListService;
 import simbot.example.core.common.Constant;
+import simbot.example.core.common.JudgeBan;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -31,7 +27,6 @@ import java.util.concurrent.TimeUnit;
  * @user 86188
  */
 @Service
-
 public class OtherApiUse extends Constant {
     /**
      * 线程池
@@ -50,6 +45,8 @@ public class OtherApiUse extends Constant {
         this.blackListService = blackListService;
     }
 
+    JudgeBan judgeBan = new JudgeBan();
+
     /**
      * 调用API中的方法
      */
@@ -66,18 +63,10 @@ public class OtherApiUse extends Constant {
     @Filter(value = "青年大学习", matchType = MatchType.REGEX_MATCHES, trim = true)
     public void youthStudy(GroupMsg groupMsg, MsgSender msgSender) {
 
-        AccountInfo accountInfo = groupMsg.getAccountInfo();
-        if (blackListService.selectCode(accountInfo.getAccountCode()) == null) {
+        // 将群号为“637384877”的群排除在人工智能答复模块外
+        if (judgeBan.allBan(groupMsg)) {
+            msgSender.SENDER.sendGroupMsg(groupMsg, otherApi.youthStudy());
 
-            Sender sender = msgSender.SENDER;
-
-            GroupInfo groupInfo = groupMsg.getGroupInfo();
-            int groupBanId = (int) Arrays.stream(groupBanIdList).filter(groupInfo.getGroupCode()::contains).count();
-            // 将群号为“637384877”的群排除在人工智能答复模块外
-            if (groupBanId != 1) {
-                sender.sendGroupMsg(groupMsg, otherApi.youthStudy());
-
-            }
         }
     }
 
@@ -92,18 +81,12 @@ public class OtherApiUse extends Constant {
     @Filter(value = "检测直播", matchType = MatchType.REGEX_MATCHES, trim = true)
     public void bLive(GroupMsg groupMsg, MsgSender msgSender) {
 
-        Sender sender = msgSender.SENDER;
-        GroupInfo groupInfo = groupMsg.getGroupInfo();
-        AccountInfo accountInfo = groupMsg.getAccountInfo();
-        if (blackListService.selectCode(accountInfo.getAccountCode()) == null) {
-
-            int groupBanId = (int) Arrays.stream(groupBanIdList).filter(groupInfo.getGroupCode()::contains).count();
-            // 将群号为“637384877”的群排除在人工智能答复模块外
-            if (groupBanId != 1) {
-                sender.sendGroupMsg(groupMsg, otherApi.bLive(BiUpUid));
-            }
+        // 将群号为“637384877”的群排除在人工智能答复模块外
+        if (judgeBan.allBan(groupMsg)) {
+            msgSender.SENDER.sendGroupMsg(groupMsg, otherApi.bLive(BiUpUid));
         }
     }
+
 
     /**
      * 可达鸭模块
@@ -117,8 +100,7 @@ public class OtherApiUse extends Constant {
     @Filter(value = "可达鸭 {{left}} {{right}}", matchType = MatchType.REGEX_MATCHES, trim = true)
     public void keDaYa(GroupMsg groupMsg, MsgSender msgSender, @FilterValue("left") String left, @FilterValue("right") String right) throws IOException {
 
-        AccountInfo accountInfo = groupMsg.getAccountInfo();
-        if (blackListService.selectCode(accountInfo.getAccountCode()) == null) {
+        if (judgeBan.allBan(groupMsg)) {
 
             String keMsg = groupMsg.getText();
             String leftMsg = keMsg.split(" ")[1];
@@ -141,18 +123,8 @@ public class OtherApiUse extends Constant {
                 right = right.substring(0, 3) + "...";
             }
 
-
-            System.out.println(left);
-            System.out.println(right);
-
-            Sender sender = msgSender.SENDER;
-            Setter setter = msgSender.SETTER;
-            GroupInfo groupInfo = groupMsg.getGroupInfo();
-
-            int groupBanId = (int) Arrays.stream(groupBanIdList).filter(groupInfo.getGroupCode()::contains).count();
-
             // 将群号在groupBanId列表中的群排除在响应外
-            if (groupBanId != 1 && !"".equals(left) && !"".equals(right) && !"".equals(leftMsg) && !"".equals(rightMsg)) {
+            if (!"".equals(left) && !"".equals(right) && !"".equals(leftMsg) && !"".equals(rightMsg)) {
                 kedaya ke = new kedaya();
 
                 // 创建消息构建器，用于在服务器上发送图片
@@ -160,9 +132,7 @@ public class OtherApiUse extends Constant {
 
                 // 消息标记
                 MessageGet.MessageFlag<? extends MessageGet.MessageFlagContent>
-                        flag = (MessageGet.MessageFlag<? extends MessageGet.MessageFlagContent>) sender.sendGroupMsg(groupMsg, messageContentBuilder.image(ke.makeImage(left, right)).build()).get();
-
-                System.out.println(flag);
+                        flag = (MessageGet.MessageFlag<? extends MessageGet.MessageFlagContent>) msgSender.SENDER.sendGroupMsg(groupMsg, messageContentBuilder.image(ke.makeImage(left, right)).build()).get();
 
                 // 线程池
                 THREAD_POOL = new ThreadPoolExecutor(50, 50, 3,
@@ -177,13 +147,13 @@ public class OtherApiUse extends Constant {
                     try {
                         // 线程休眠10秒
                         Thread.sleep(10000);
-                        setter.setMsgRecall(flag);
+                        msgSender.SETTER.setMsgRecall(flag);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
                 });
             } else {
-                sender.sendGroupMsg(groupMsg, "输入了不正确的内容，阿姬不给你可达鸭！");
+                msgSender.SENDER.sendGroupMsg(groupMsg, "输入了不正确的内容，阿姬不给你可达鸭！");
             }
         }
     }

@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import simbot.example.Service.BlackListService;
 import simbot.example.core.common.Constant;
+import simbot.example.core.common.JudgeBan;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -42,16 +43,13 @@ public class YuanShenApiUse extends Constant {
         this.messageContentBuilderFactory = messageContentBuilderFactory;
         this.blackListService = blackListService;
     }
+    JudgeBan judgeBan = new JudgeBan();
 
     @OnGroup
     @Filter(value = "原神抽卡分析", matchType = MatchType.CONTAINS, trim = true)
     public void gaChaLog(GroupMsg groupMsg, MsgSender msgSender) throws Exception {
 
-        GroupInfo groupInfo = groupMsg.getGroupInfo();
-        AccountInfo accountInfo = groupMsg.getAccountInfo();
-
-        int groupBanId = (int) Arrays.stream(groupBanIdList).filter(groupInfo.getGroupCode()::contains).count();
-        if (groupBanId != 1 && blackListService.selectCode(accountInfo.getAccountCode()) == null) {
+        if (judgeBan.allBan(groupMsg)) {
 
             String url = YuanApi.toUrl(groupMsg.getMsg());
             String urlCheckType = YuanApi.checkApi(url);

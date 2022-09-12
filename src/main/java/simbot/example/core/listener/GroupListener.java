@@ -24,15 +24,16 @@ import simbot.example.BootAPIUse.YuanShenAPI.Sign.SignConstant;
 import simbot.example.Service.BlackListService;
 import simbot.example.Util.CatUtil;
 import simbot.example.Util.ContextUtil;
-import simbot.example.core.common.Constant;
-import simbot.example.core.common.PeopleChangeWrite;
-import simbot.example.core.common.TimeTranslate;
-import simbot.example.core.common.Writing;
+import simbot.example.core.common.*;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
-import java.util.Arrays;
-import java.util.Objects;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -55,13 +56,23 @@ public class GroupListener extends Constant {
      */
     ApplicationContext applicationContext;
 
+    JudgeBan judgeBan;
+
     @Autowired
-    public GroupListener(BlackListService blackListService, ApplicationContext applicationContext) {
+    public GroupListener(BlackListService blackListService, ApplicationContext applicationContext, JudgeBan judgeBan) {
         this.blackListService = blackListService;
         this.applicationContext = applicationContext;
+        this.judgeBan = judgeBan;
+        try {
+            readTxt();
+        } catch (Exception exception) {
+            exception.printStackTrace();
+        }
+
     }
 
     ContextUtil contextUtil = new ContextUtil();
+
 
     /**
      * 将信息存入日志
@@ -162,49 +173,73 @@ public class GroupListener extends Constant {
      * 关机模块
      * #@Filter() 注解为消息过滤器
      *
-     * @param groupMsg  用于获取群聊消息，群成员信息等
-     * @param msgSender 用于在群聊中发送消息
+     * @param msgGet    获取消息类型
+     * @param msgSender 用于发送消息
      */
     @OnGroup
-    @Filter(atBot = true, value = ".关机", matchType = MatchType.REGEX_MATCHES, trim = true)
-    public void setGroupStateClose(GroupMsg groupMsg, MsgSender msgSender) {
-        AccountInfo accountInfo = groupMsg.getAccountInfo();
-        GroupInfo groupInfo = groupMsg.getGroupInfo();
-        int groupBanId = (int) Arrays.stream(groupBanIdList).filter(groupInfo.getGroupCode()::contains).count();
+    @OnPrivate
+    @Filter(value = ".关机", matchType = MatchType.REGEX_MATCHES, trim = true)
+    public void setGroupStateClose(MsgSender msgSender, MsgGet msgGet) {
 
-        String setUser = accountInfo.getAccountCode();
-        if (groupBanId != 1 && blackListService.selectCode(accountInfo.getAccountCode()) == null) {
-            if (setUser.equals(USERID1)) {
-                BOOTSTATE = false;
-                System.out.println("已关机");
-                msgSender.SENDER.sendGroupMsg(groupMsg, "姬姬关机了！");
+        String setUser = msgGet.getAccountInfo().getAccountCode();
+
+        if (judgeBan.allBan(msgGet)) {
+            if (msgGet instanceof GroupMsg) {
+                GroupMsg groupMsg = (GroupMsg) msgGet;
+                if (setUser.equals(USERID1)) {
+                    BOOTSTATE = true;
+                    System.out.println("已关机");
+                    msgSender.SENDER.sendGroupMsg(groupMsg, "姬姬关机了！");
+                } else {
+                    msgSender.SENDER.sendGroupMsg(groupMsg, "你没有姬姬的权限哦~");
+                }
             } else {
-                msgSender.SENDER.sendGroupMsg(groupMsg, "你没有姬姬的权限哦~");
+                PrivateMsg privateMsg = (PrivateMsg) msgGet;
+                if (setUser.equals(USERID1)) {
+                    BOOTSTATE = true;
+                    System.out.println("已关机");
+                    msgSender.SENDER.sendPrivateMsg(privateMsg, "姬姬关机了！");
+                } else {
+                    msgSender.SENDER.sendPrivateMsg(privateMsg, "你没有姬姬的权限哦~");
+                }
             }
         }
     }
+
 
     /**
      * 开机模块
      * #@Filter() 注解为消息过滤器
      *
-     * @param groupMsg  用于获取群聊消息，群成员信息等
-     * @param msgSender 用于在群聊中发送消息
+     * @param msgSender 用于发送消息
+     * @param msgGet    用于获取消息类型
      */
     @OnGroup
-    @Filter(atBot = true, value = ".开机", matchType = MatchType.REGEX_MATCHES, trim = true)
-    public void setGroupStateOpen(GroupMsg groupMsg, MsgSender msgSender) {
-        AccountInfo accountInfo = groupMsg.getAccountInfo();
-        GroupInfo groupInfo = groupMsg.getGroupInfo();
-        String setUser = accountInfo.getAccountCode();
-        int groupBanId = (int) Arrays.stream(groupBanIdList).filter(groupInfo.getGroupCode()::contains).count();
-        if (groupBanId != 1 && blackListService.selectCode(accountInfo.getAccountCode()) == null) {
-            if (setUser.equals(USERID1)) {
-                BOOTSTATE = true;
-                System.out.println("已开机");
-                msgSender.SENDER.sendGroupMsg(groupMsg, "姬姬开机了！");
+    @OnPrivate
+    @Filter(value = ".开机", matchType = MatchType.REGEX_MATCHES, trim = true)
+    public void setGroupStateOpen(MsgSender msgSender, MsgGet msgGet) {
+
+        String setUser = msgGet.getAccountInfo().getAccountCode();
+
+        if (judgeBan.allBan(msgGet)) {
+            if (msgGet instanceof GroupMsg) {
+                GroupMsg groupMsg = (GroupMsg) msgGet;
+                if (setUser.equals(USERID1)) {
+                    BOOTSTATE = true;
+                    System.out.println("已开机");
+                    msgSender.SENDER.sendGroupMsg(groupMsg, "姬姬开机了！");
+                } else {
+                    msgSender.SENDER.sendGroupMsg(groupMsg, "你没有姬姬的权限哦~");
+                }
             } else {
-                msgSender.SENDER.sendGroupMsg(groupMsg, "你没有姬姬的权限哦~");
+                PrivateMsg privateMsg = (PrivateMsg) msgGet;
+                if (setUser.equals(USERID1)) {
+                    BOOTSTATE = true;
+                    System.out.println("已开机");
+                    msgSender.SENDER.sendPrivateMsg(privateMsg, "姬姬开机了！");
+                } else {
+                    msgSender.SENDER.sendPrivateMsg(privateMsg, "你没有姬姬的权限哦~");
+                }
             }
         }
     }
@@ -220,28 +255,24 @@ public class GroupListener extends Constant {
     @OnGroup
     @Filter(value = "请求@全体成员 *{{msg}}", matchType = MatchType.REGEX_MATCHES, trim = true)
     public void atAll(GroupMsg groupMsg, MsgSender msgSender, @FilterValue("msg") String msg) {
-        Sender sender = msgSender.SENDER;
 
         AccountInfo accountInfo = groupMsg.getAccountInfo();
-        GroupInfo groupInfo = groupMsg.getGroupInfo();
-        String groupId = groupInfo.getGroupCode();
-
-        int groupBanId = (int) Arrays.stream(groupBanIdList).filter(groupInfo.getGroupCode()::contains).count();
+        String groupId = groupMsg.getGroupInfo().getGroupCode();
 
         // 判断bot是否为管理员
         GroupMemberInfo groupMemberInfo = msgSender.GETTER.getMemberInfo(groupId, BOOTID1);
 
         // @的人
         String atPeople = "[CAT:at,code=" + accountInfo.getAccountCode() + "]";
-        if (groupBanId != 1 && blackListService.selectCode(accountInfo.getAccountCode()) == null && BOOTSTATE) {
+        if (judgeBan.allBan(groupMsg)) {
             if (groupMemberInfo.getPermission().isAdmin() || groupMemberInfo.getPermission().isOwner()) {
                 if (USERID1.equals(accountInfo.getAccountCode())) {
-                    sender.sendGroupMsg(groupId, cat1 + groupMsg.getMsg());
+                    msgSender.SENDER.sendGroupMsg(groupId, cat1 + groupMsg.getMsg());
                 } else {
-                    sender.sendGroupMsg(groupMsg, atPeople + "你没有权限@全体成员哦");
+                    msgSender.SENDER.sendGroupMsg(groupMsg, atPeople + "你没有权限@全体成员哦");
                 }
             } else {
-                sender.sendGroupMsg(groupMsg, atPeople + "阿姬没有拿到权限！" + face);
+                msgSender.SENDER.sendGroupMsg(groupMsg, atPeople + "阿姬没有拿到权限！" + face);
             }
         }
     }
@@ -260,14 +291,7 @@ public class GroupListener extends Constant {
         Sender sender = msgSender.SENDER;
 
         AccountInfo accountInfo = groupMsg.getAccountInfo();
-        GroupInfo groupInfo = groupMsg.getGroupInfo();
-
-        int groupBanId = (int) Arrays.stream(groupBanIdList).filter(groupInfo.getGroupCode()::contains).count();
-
-        String groupId = groupInfo.getGroupCode();
-
-        // 通过猫猫码获取被@的人
-        String people = CatUtil.getAt(groupMsg.getMsg());
+        String groupId = groupMsg.getGroupInfo().getGroupCode();
 
         // 判断bot是否为管理员
         GroupMemberInfo groupMemberInfo = msgSender.GETTER.getMemberInfo(groupId, BOOTID1);
@@ -275,12 +299,11 @@ public class GroupListener extends Constant {
         // @的人
         String atPeople = "[CAT:at,code=" + accountInfo.getAccountCode() + "]";
 
-        if (groupBanId != 1 && blackListService.selectCode(accountInfo.getAccountCode()) == null && BOOTSTATE) {
+        if (judgeBan.allBan(groupMsg)) {
             if (groupMemberInfo.getPermission().isAdmin() || groupMemberInfo.getPermission().isOwner()) {
                 if (USERID1.equals(accountInfo.getAccountCode())) {
 
-                    assert people != null;
-                    setter.setGroupBan(groupId, people, Long.parseLong(time), TimeUnit.MINUTES);
+                    setter.setGroupBan(groupId, Objects.requireNonNull(CatUtil.getAt(groupMsg.getMsg())), Long.parseLong(time), TimeUnit.MINUTES);
                     // setter.setGroupWholeBan(GROUPID1,true); 群禁言
                 } else {
                     sender.sendGroupMsg(groupMsg, atPeople + "你没有权限禁言哦");
@@ -301,15 +324,10 @@ public class GroupListener extends Constant {
     @OnGroup
     @Filter(value = "解除禁言", matchType = MatchType.REGEX_MATCHES, trim = true)
     public void removeBan(GroupMsg groupMsg, MsgSender msgSender) {
-        Setter setter = msgSender.SETTER;
-        Sender sender = msgSender.SENDER;
-
         // 获取群信息-群号-个人信息
-        GroupInfo groupInfo = groupMsg.getGroupInfo();
         AccountInfo accountInfo = groupMsg.getAccountInfo();
-        String groupId = groupInfo.getGroupCode();
+        String groupId = groupMsg.getGroupInfo().getGroupCode();
 
-        int groupBanId = (int) Arrays.stream(groupBanIdList).filter(groupInfo.getGroupCode()::contains).count();
 
         // 通过猫猫码获取被@的人
         String people = CatUtil.getAt(groupMsg.getMsg());
@@ -320,19 +338,19 @@ public class GroupListener extends Constant {
         // @的人
         String atPeople = "[CAT:at,code=" + accountInfo.getAccountCode() + "]";
 
-        if (groupBanId != 1 && blackListService.selectCode(accountInfo.getAccountCode()) == null && BOOTSTATE) {
+        if (judgeBan.allBan(groupMsg)) {
             if (groupMemberInfo.getPermission().isAdmin() || groupMemberInfo.getPermission().isOwner()) {
                 if (USERID1.equals(accountInfo.getAccountCode())) {
 
                     // 将群成员设置为解除禁言的状态
                     assert people != null;
-                    setter.setGroupBan(groupId, people, 0, TimeUnit.MINUTES);
+                    msgSender.SETTER.setGroupBan(groupId, people, 0, TimeUnit.MINUTES);
                 } else {
-                    setter.setGroupBan(groupId, atPeople, 0, TimeUnit.MINUTES);
-                    sender.sendGroupMsg(groupId, atPeople + "你没有权限解除禁言哦~");
+                    msgSender.SETTER.setGroupBan(groupId, atPeople, 0, TimeUnit.MINUTES);
+                    msgSender.SENDER.sendGroupMsg(groupId, atPeople + "你没有权限解除禁言哦~");
                 }
             } else {
-                sender.sendGroupMsg(groupMsg, atPeople + "阿姬没有拿到权限！" + face);
+                msgSender.SENDER.sendGroupMsg(groupMsg, atPeople + "阿姬没有拿到权限！" + face);
             }
         }
     }
@@ -349,10 +367,9 @@ public class GroupListener extends Constant {
     @Filter(atBot = true, value = "/刷屏", matchType = MatchType.REGEX_MATCHES, trim = true)
     public void swipe(GroupMsg groupMsg, MsgSender msgSender) {
         AccountInfo accountInfo = groupMsg.getAccountInfo();
-        GroupInfo groupInfo = groupMsg.getGroupInfo();
         String setUser = accountInfo.getAccountCode();
-        int groupBanId = (int) Arrays.stream(groupBanIdList).filter(groupInfo.getGroupCode()::contains).count();
-        if (groupBanId != 1 && blackListService.selectCode(accountInfo.getAccountCode()) == null && BOOTSTATE) {
+
+        if (judgeBan.allBan(groupMsg)) {
             if (setUser.equals(USERID1)) {
                 int times = 20;
                 for (int i = 0; i < times; i++) {
@@ -362,9 +379,7 @@ public class GroupListener extends Constant {
             } else {
                 msgSender.SENDER.sendGroupMsg(groupMsg, "刷屏是不好的哦~");
             }
-
         }
-
     }
 
 
@@ -405,7 +420,7 @@ public class GroupListener extends Constant {
      * @param msgSender           用于在群聊中发送消息
      */
     @OnGroupMemberIncrease
-    public void memberIncrease(GroupMemberIncrease groupMemberIncrease, MsgSender msgSender) {
+    public void memberIncrease(GroupMemberIncrease groupMemberIncrease, MsgSender msgSender, MsgGet msgGet) {
 
         // 得到一个消息构建器。
         MessageContentBuilder builder = factory.getMessageContentBuilder();
@@ -414,9 +429,8 @@ public class GroupListener extends Constant {
         AccountInfo accountInfo = groupMemberIncrease.getAccountInfo();
         GroupInfo groupInfo = groupMemberIncrease.getGroupInfo();
 
-        int groupBanId = (int) Arrays.stream(groupBanIdList).filter(groupInfo.getGroupCode()::contains).count();
 
-        if (groupBanId != 1 && blackListService.selectCode(accountInfo.getAccountCode()) == null && BOOTSTATE) {
+        if (judgeBan.allBan(msgGet)) {
 
             Sender sender = msgSender.SENDER;
 
@@ -604,5 +618,52 @@ public class GroupListener extends Constant {
                 + "--" + accountInfo.getAccountCode()
                 + "]申请成为你的好友--" + "\n");
 
+    }
+
+    List<String> msgList = new ArrayList<>();
+
+    /**
+     * 读取TXT中的句子并进行初始化存入list中
+     *
+     * @throws Exception Io流异常
+     */
+    public void readTxt() throws Exception {
+        File idiomsTxt = new File("GameRes/随机句子.txt").getAbsoluteFile();
+        if (idiomsTxt.isFile() && idiomsTxt.exists()) {
+
+            InputStreamReader reader = new InputStreamReader(new FileInputStream(idiomsTxt), StandardCharsets.UTF_8);
+
+            BufferedReader bufferedReader = new BufferedReader(reader);
+
+            String linTxt;
+            while ((linTxt = bufferedReader.readLine()) != null) {
+                msgList.add(linTxt);
+            }
+            reader.close();
+        } else {
+            System.out.println("读取出错");
+        }
+    }
+
+    Map<String, Integer> map = new HashMap<>();
+
+    /**
+     * 在群聊中随机发送句子
+     *
+     * @param groupMsg  群聊消息
+     * @param msgSender 发送消息
+     */
+    @OnGroup
+    public void randomMsg(GroupMsg groupMsg, MsgSender msgSender) {
+
+        String groupId = groupMsg.getGroupInfo().getGroupCode();
+
+        if (judgeBan.allBan(groupMsg)) {
+            map.merge(groupId, 1, Integer::sum);
+            if (map.get(groupId) == 100) {
+                msgSender.SENDER.sendGroupMsg(groupMsg, msgList.get((int) (Math.random() * msgList.size())));
+                map.put(groupId, 0);
+            }
+        }
     }
 }

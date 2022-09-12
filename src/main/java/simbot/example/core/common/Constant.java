@@ -27,8 +27,8 @@ public class Constant {
 
     public String USERID1 = "2094085327";
 
-   // public String BOOTID1 = "341677404";
-    public String BOOTID1 = "1918522690";
+    public String BOOTID1 = "341677404";
+   // public String BOOTID1 = "1918522690";
 
     public String SENTENCE1 = "这群里的机器人，难道只会复读？";
     public String SENTENCE2 = "除了复读，你们一无是处！";

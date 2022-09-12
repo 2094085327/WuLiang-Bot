@@ -1,14 +1,11 @@
 package simbot.example.core.listener;
 
-import love.forte.simbot.annotation.Filter;
 import love.forte.simbot.annotation.Listen;
-import love.forte.simbot.annotation.OnPrivate;
 import love.forte.simbot.api.message.containers.AccountInfo;
 import love.forte.simbot.api.message.containers.BotInfo;
 import love.forte.simbot.api.message.events.PrivateMsg;
 import love.forte.simbot.api.sender.MsgSender;
 import love.forte.simbot.api.sender.Sender;
-import love.forte.simbot.filter.MatchType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import simbot.example.BootAPIUse.MlyaiAPI.MlyaiApi;
@@ -45,49 +42,6 @@ public class PrivateListener extends Constant {
     public static ExecutorService THREAD_POOL;
 
     /**
-     * 解除禁言模块
-     * #@Filter() 注解为消息过滤器
-     *
-     * @param privateMsg 用于获取群聊消息，群成员信息等
-     * @param msgSender  用于在群聊中发送消息
-     */
-    @OnPrivate
-    @Filter(value = ".关机", matchType = MatchType.REGEX_MATCHES, trim = true)
-    public void setGroupStateClose(PrivateMsg privateMsg, MsgSender msgSender) {
-        AccountInfo accountInfo = privateMsg.getAccountInfo();
-        String setUser = accountInfo.getAccountCode();
-        if (setUser.equals(USERID1)) {
-            BOOTSTATE = false;
-            System.out.println("已关机");
-            msgSender.SENDER.sendPrivateMsg(privateMsg, "姬姬关机了！");
-        } else {
-            msgSender.SENDER.sendPrivateMsg(privateMsg, "你没有姬姬的权限哦~");
-        }
-    }
-
-    /**
-     * 解除禁言模块
-     * #@Filter() 注解为消息过滤器
-     *
-     * @param privateMsg 用于获取群聊消息，群成员信息等
-     * @param msgSender  用于在群聊中发送消息
-     */
-    @OnPrivate
-    @Filter(value = ".开机", matchType = MatchType.REGEX_MATCHES, trim = true)
-    public void setGroupStateOpen(PrivateMsg privateMsg, MsgSender msgSender) {
-        AccountInfo accountInfo = privateMsg.getAccountInfo();
-        String setUser = accountInfo.getAccountCode();
-        if (setUser.equals(USERID1)) {
-            BOOTSTATE = true;
-            System.out.println("已开机");
-            msgSender.SENDER.sendPrivateMsg(privateMsg, "姬姬开机了！");
-        } else {
-            msgSender.SENDER.sendPrivateMsg(privateMsg, "你没有姬姬的权限哦~");
-        }
-    }
-
-
-    /**
      * 监听私聊消息并存入日志
      *
      * @param msg       私聊消息获取
@@ -121,7 +75,6 @@ public class PrivateListener extends Constant {
         Writing writer = new Writing();
         writer.write(personMsg + "\n");
     }
-
 }
 
 

@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import simbot.example.BootAPIUse.OtherAPI.OtherApi;
 import simbot.example.Service.BlackListService;
 import simbot.example.core.common.Constant;
+import simbot.example.core.common.JudgeBan;
 
 import java.util.Arrays;
 import java.util.concurrent.ExecutorService;
@@ -51,6 +52,8 @@ public class MlyaiApiUse extends Constant {
      */
     public OtherApi otherApi = new OtherApi();
 
+    JudgeBan judgeBan = new JudgeBan();
+
     /**
      * 人工智能回复模块
      * 在收到@时调用人工智能Api进行回复
@@ -77,23 +80,23 @@ public class MlyaiApiUse extends Constant {
         int groupBanId = (int) Arrays.stream(groupBanIdList).filter(groupInfo.getGroupCode()::contains).count();
 
         // 当输入的msg通过contains匹配到相应指令时listSize值为1，无相应指令时为0，在无指令时调用API
-        if (listSize != 1) {
-            // 将在BAN列表中的群排除在人工智能答复模块外
-            if (groupBanId != 1 && BOOTSTATE && blackListService.selectCode(accountInfo.getAccountCode()) == null) {
 
-                msgSender.SENDER.sendGroupMsg(groupMsg, mlyaiApi.chat(content, id, fromName, 2, groupId, groupName));
-                System.out.println(content);
-            }
-            // 当被Bot在被屏蔽的群组中被@时将消息转发至User
-            if (groupBanId == 1) {
+        // 将在BAN列表中的群排除在人工智能答复模块外
+        if (judgeBan.allBan(groupMsg) && listSize != 1) {
+            System.out.println("发送");
+            msgSender.SENDER.sendGroupMsg(groupMsg, mlyaiApi.chat(content, id, fromName, 2, groupId, groupName));
+            System.out.println(content);
+        }
+        // 当被Bot在被屏蔽的群组中被@时将消息转发至User
+        if (groupBanId == 1) {
 
-                msgSender.SENDER.sendPrivateMsg(USERID1, "[" + accountInfo.getAccountCode()
-                        + "-" + accountInfo.getAccountNickname() + "]正在屏蔽群组["
-                        + groupInfo.getGroupCode() + "-" + groupInfo.getGroupName() + "]@Bot");
-                msgSender.SENDER.sendPrivateMsg(USERID1, "消息内容为:" + groupMsg.getMsg());
-            }
+            msgSender.SENDER.sendPrivateMsg(USERID1, "[" + accountInfo.getAccountCode()
+                    + "-" + accountInfo.getAccountNickname() + "]正在屏蔽群组["
+                    + groupInfo.getGroupCode() + "-" + groupInfo.getGroupName() + "]@Bot");
+            msgSender.SENDER.sendPrivateMsg(USERID1, "消息内容为:" + groupMsg.getMsg());
         }
     }
+
 
     /**
      * 私聊消息回复与撤回
@@ -119,7 +122,7 @@ public class MlyaiApiUse extends Constant {
         // 将数组通过流的形式遍历并计数有效的指令个数
         int listSize = (int) Arrays.stream(list).filter(msgs::contains).count();
 
-        if (BOOTSTATE && listSize != 1 && blackListService.selectCode(accountInfo.getAccountCode()) == null) {
+        if (listSize != 1 && judgeBan.allBan(privateMsg)) {
 
             THREAD_POOL.execute(() -> {
 
