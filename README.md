@@ -1,7 +1,6 @@
 <div align="center">
     <img src="http://gchat.qpic.cn/gchatpic_new/2094085327/695525945-2916960648-F41E176B39C491DECA3AA5D2373FCE43/0?term&#61;3" alt="logo" style="width:233px ;height:233px;border-radius:50%"/>
     <p>
-    	
 </div>
 
 

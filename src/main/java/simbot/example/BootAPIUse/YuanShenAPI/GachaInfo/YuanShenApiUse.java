@@ -4,8 +4,6 @@ import love.forte.simbot.annotation.Filter;
 import love.forte.simbot.annotation.OnGroup;
 import love.forte.simbot.api.message.MessageContentBuilder;
 import love.forte.simbot.api.message.MessageContentBuilderFactory;
-import love.forte.simbot.api.message.containers.AccountInfo;
-import love.forte.simbot.api.message.containers.GroupInfo;
 import love.forte.simbot.api.message.events.GroupMsg;
 import love.forte.simbot.api.sender.MsgSender;
 import love.forte.simbot.filter.MatchType;
@@ -16,10 +14,13 @@ import simbot.example.Service.BlackListService;
 import simbot.example.core.common.Constant;
 import simbot.example.core.common.JudgeBan;
 
+import java.awt.*;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.InputStream;
-import java.util.Arrays;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
 /**
  * @author zeng
@@ -43,6 +44,7 @@ public class YuanShenApiUse extends Constant {
         this.messageContentBuilderFactory = messageContentBuilderFactory;
         this.blackListService = blackListService;
     }
+
     JudgeBan judgeBan = new JudgeBan();
 
     @OnGroup
@@ -76,18 +78,30 @@ public class YuanShenApiUse extends Constant {
 
                 picture.allPictureMake();
 
-                InputStream inputStream = new FileInputStream(new File("yuanImage/finally.png").getAbsoluteFile());
+                InputStream inputStream = new FileInputStream(new File("resources/yuanImage/finally.png").getAbsoluteFile());
 
                 // 创建消息构建器，用于在服务器上发送图片
                 MessageContentBuilder messageContentBuilder = messageContentBuilderFactory.getMessageContentBuilder();
                 try {
-                    Thumbnails.of(new File("yuanImage/finally.png")).scale(0.25).toFile(new File("yuanImage/finally.png"));
+                    Thumbnails.of(new File("resources/yuanImage/finally.png")).scale(0.25).toFile(new File("resources/yuanImage/finally.png"));
                 } catch (Exception e) {
                     msgSender.SENDER.sendGroupMsg(groupMsg, "压缩异常！");
                 }
 
                 msgSender.SENDER.sendGroupMsg(groupMsg, messageContentBuilder.image(inputStream).build());
 
+                inputStream.close();
+
+                // 删除生成的图片减少内存占用
+                try {
+                    Files.delete(Paths.get(new File("resources/yuanImage/allData.png").getAbsolutePath()));
+                    Files.delete(Paths.get(new File("resources/yuanImage/arms pool.png").getAbsolutePath()));
+                    Files.delete(Paths.get(new File("resources/yuanImage/permanent pool.png").getAbsolutePath()));
+                    Files.delete(Paths.get(new File("resources/yuanImage/role pool.png").getAbsolutePath()));
+                    Files.delete(Paths.get(new File("resources/yuanImage/finally.png").getAbsolutePath()));
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
         }
     }

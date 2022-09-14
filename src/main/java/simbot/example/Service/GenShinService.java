@@ -15,6 +15,10 @@ import simbot.example.Mapper.GenShinMapper;
 import simbot.example.core.common.Constant;
 
 import javax.annotation.Resource;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.List;
 
 /**
@@ -29,9 +33,10 @@ public class GenShinService extends Constant {
 
     GenShinMapper genShinMapper;
 
-    GenShinSign genShinSign ;
+    GenShinSign genShinSign;
 
     GenShinUser genShinUser = new GenShinUser();
+
     @Autowired
     public GenShinService(GenShinMapper genShinMapper, GenShinSign genShinSign) {
         this.genShinMapper = genShinMapper;
@@ -154,6 +159,7 @@ public class GenShinService extends Constant {
 
     /**
      * 展示当前QQ账号所绑定的UID
+     *
      * @param qqid QQ号
      * @return 返回账号列表
      */
@@ -181,6 +187,7 @@ public class GenShinService extends Constant {
 
     /**
      * 查看所有绑定的用户UID和昵称
+     *
      * @return 返回要发送的信息
      */
     public String showAllList() {
@@ -212,23 +219,31 @@ public class GenShinService extends Constant {
         for (GenShinUser genShinUser : genShinUsers1) {
 
             // 执行签到,同时对当前数据进行初始化
-            if (genShinSign. doSign(selectUid(genShinUser.getUid()))) {
+            if (genShinSign.doSign(selectUid(genShinUser.getUid()))) {
 
                 if (GenShinSign.push == 1) {
                     // @的人
                     String atPeople = "[CAT:at,code=" + genShinUser.getQqid() + "]";
-                     sendGroupMsg("1019170385", atPeople + GenShinSign.getMessage());
+                    sendGroupMsg("1019170385", atPeople + GenShinSign.getMessage());
 
-                    genShinSign. signList(genShinUser.getUid());
+                    genShinSign.signList(genShinUser.getUid());
                     System.out.println(GenShinSign.getItemImg());
 
-                      sendGroupMsg("1019170385", GenShinSign.getItemMsg() + "\n" + util.toCat("image", true, "file=" + GenShinSign.getItemImg()));
-                }
-                genShinSign.  signList(genShinUser.getUid());
+                    sendGroupMsg("1019170385", GenShinSign.getItemMsg() + "\n" + util.toCat("image", true, "file=" + new File("resources/yuanImage/登录奖励/all.png").getAbsoluteFile()));
 
-                sendGroupMsg("140469072", GenShinSign.getItemMsg() + "\n" + util.toCat("image", true, "file=" + GenShinSign.getItemImg()));
+                }
+                genShinSign.signList(genShinUser.getUid());
+
+                sendGroupMsg("140469072", GenShinSign.getItemMsg() + "\n" + util.toCat("image", true, "file=" + new File("resources/yuanImage/登录奖励/all.png").getAbsoluteFile()));
+
+                try {
+                    Files.delete(Paths.get(new File("resources/yuanImage/登录奖励/all.png").getAbsolutePath()));
+                    Files.delete(Paths.get(new File("resources/yuanImage/登录奖励/itemImg.png").getAbsolutePath()));
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
-              sendGroupMsg("140469072", genShinUser.getNickname() + ":" + GenShinSign.getMessage());
+            sendGroupMsg("140469072", genShinUser.getNickname() + ":" + GenShinSign.getMessage());
         }
     }
 }

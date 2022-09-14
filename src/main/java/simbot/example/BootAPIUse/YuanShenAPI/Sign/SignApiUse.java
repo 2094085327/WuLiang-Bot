@@ -19,6 +19,12 @@ import simbot.example.Service.GenShinService;
 import simbot.example.core.common.Constant;
 import simbot.example.core.common.JudgeBan;
 
+import java.awt.*;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Arrays;
 
 /**
@@ -46,7 +52,7 @@ public class SignApiUse extends Constant {
 
     public GenShinSign sign = new GenShinSign();
     JudgeBan judgeBan = new JudgeBan();
-
+    CatCodeUtil util = CatCodeUtil.INSTANCE;
     /**
      * 信息检查
      *
@@ -85,7 +91,15 @@ public class SignApiUse extends Constant {
                         sign.signList(uid);
 
                         CatCodeUtil util = CatCodeUtil.INSTANCE;
-                        msgSender.SENDER.sendGroupMsg(groupMsg, GenShinSign.getItemMsg() + "\n" + util.toCat("image", true, "file=" + GenShinSign.getItemImg()));
+
+                        msgSender.SENDER.sendGroupMsg(groupMsg, GenShinSign.getItemMsg() + "\n" + util.toCat("image", true, "file=" +new File("resources/yuanImage/登录奖励/all.png").getAbsoluteFile()));
+
+                        try {
+                            Files.delete(Paths.get(new File("resources/yuanImage/登录奖励/all.png").getAbsolutePath()));
+                            Files.delete(Paths.get(new File("resources/yuanImage/登录奖励/itemImg.png").getAbsolutePath()));
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
                     }
                     msgSender.SENDER.sendGroupMsg(groupMsg, GenShinSign.getMessage());
                 }
@@ -386,5 +400,4 @@ public class SignApiUse extends Constant {
             genShinService.signAll();
         }
     }
-
 }

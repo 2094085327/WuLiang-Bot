@@ -8,6 +8,11 @@ import org.springframework.stereotype.Component;
 import simbot.example.Mapper.GenShinMapper;
 import simbot.example.Util.HttpUtils;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.net.URL;
+import java.net.URLConnection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -178,13 +183,49 @@ public class GenShinSign {
         String itemName = jsonArray.getJSONObject(totalSignDay).getString("name");
         int itemCnt = jsonArray.getJSONObject(totalSignDay).getInt("cnt");
 
-
-        System.out.println(jsonArray.getJSONObject(totalSignDay).getString("name"));
-        System.out.println(jsonArray.getJSONObject(totalSignDay).getInt("cnt"));
-
         String img = jsonArray.getJSONObject(totalSignDay).getString("icon");
+
+        loadImg(img);
+        SignPicture.signImg("X"+itemCnt, String.valueOf(totalSignDay+1));
 
         setItemMsg("今天获取的奖励是:[" + itemName + "X" + itemCnt + "]");
         setItemImg(img);
+    }
+
+    /**
+     * 缓存图片
+     *
+     * @param url 图片路径
+     */
+    public void loadImg(String url)  {
+        try {
+            // 构造URL
+            URL imgUrl = new URL(url);
+            // 打开连接
+            URLConnection con = imgUrl.openConnection();
+            // 输入流
+            InputStream is = con.getInputStream();
+            // 1K的数据缓冲
+            byte[] bs = new byte[1024];
+            // 读取到的数据长度
+
+            int len;
+
+            // 输出的文件流
+            File file = new File("resources/yuanImage/登录奖励/itemImg.png").getAbsoluteFile();
+
+            FileOutputStream os = new FileOutputStream(file, true);
+
+            // 开始读取
+            while ((len = is.read(bs)) != -1) {
+                os.write(bs, 0, len);
+            }
+            // 完毕，关闭所有链接
+            os.close();
+            is.close();
+        }catch (Exception e){
+            e.printStackTrace();
+            System.out.println("下载签到奖励失败");
+        }
     }
 }

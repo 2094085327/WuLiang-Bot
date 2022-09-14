@@ -133,7 +133,7 @@ public class PictureApiUse extends Constant {
             try {
                 loadImg(url, imgName);
 
-                InputStream inputStream = new FileInputStream(new File("image/" + imgName + ".jpg").getAbsoluteFile());
+                InputStream inputStream = new FileInputStream(new File("resources/image/" + imgName + ".jpg").getAbsoluteFile());
 
                 // 创建消息构建器，用于在服务器上发送图片
                 MessageContentBuilder messageContentBuilder = messageContentBuilderFactory.getMessageContentBuilder();
@@ -174,7 +174,7 @@ public class PictureApiUse extends Constant {
                             e.printStackTrace();
                         }
                     }
-                    Path path = Paths.get(new File("image/" + imgName + ".jpg").getAbsolutePath());
+                    Path path = Paths.get(new File("resources/image/" + imgName + ".jpg").getAbsolutePath());
                     try {
                         Files.delete(path);
                     } catch (IOException e) {
@@ -209,7 +209,7 @@ public class PictureApiUse extends Constant {
         int len;
 
         // 输出的文件流
-        File file = new File("image/" + name + ".jpg").getAbsoluteFile();
+        File file = new File("resources/image/" + name + ".jpg").getAbsoluteFile();
 
         FileOutputStream os = new FileOutputStream(file, true);
 

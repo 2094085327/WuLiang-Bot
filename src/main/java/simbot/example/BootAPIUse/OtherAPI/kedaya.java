@@ -17,7 +17,7 @@ public class kedaya {
     public byte[] makeImage(String left, String right) throws IOException {
         AnimatedGifEncoder encoder = new AnimatedGifEncoder();
 
-        File file = new File("image/kedaya.gif");
+        File file = new File("resources/image/kedaya.gif");
 
         InputStream inputStream2 = new FileInputStream(file.getAbsoluteFile());
 
@@ -90,6 +90,7 @@ public class kedaya {
 
         }
         encoder.finish();
+        inputStream2.close();
         return outputStream.toByteArray();
 
 

@@ -32,7 +32,7 @@ public class picture {
 
         try {
 
-            ImageIcon withe = new ImageIcon(new File("yuanImage/withe.png").getAbsolutePath());
+            ImageIcon withe = new ImageIcon(new File("resources/yuanImage/withe.png").getAbsolutePath());
 
             BufferedImage bi = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
 
@@ -44,7 +44,7 @@ public class picture {
                     RenderingHints.VALUE_RENDER_QUALITY));
             g2d.drawImage(withe.getImage(), 0, 0, width, height, null);
 
-            ImageIO.write(bi, "png", new File("yuanImage/withe2.png").getAbsoluteFile());
+            ImageIO.write(bi, "png", new File("resources/yuanImage/withe2.png").getAbsoluteFile());
 
         } catch (Exception e) {
 
@@ -64,19 +64,19 @@ public class picture {
     public static BufferedImage choseLuck(double probability) throws IOException {
 
         if (probability > 80) {
-            return ImageIO.read(new File("yuanImage/运气/欧.png").getAbsoluteFile());
+            return ImageIO.read(new File("resources/yuanImage/运气/欧.png").getAbsoluteFile());
         }
         if (probability > 60) {
-            return ImageIO.read(new File("yuanImage/运气/吉.png").getAbsoluteFile());
+            return ImageIO.read(new File("resources/yuanImage/运气/吉.png").getAbsoluteFile());
         }
         if (probability > 40) {
-            return ImageIO.read(new File("yuanImage/运气/平.png").getAbsoluteFile());
+            return ImageIO.read(new File("resources/yuanImage/运气/平.png").getAbsoluteFile());
         }
         if (probability > 20) {
-            return ImageIO.read(new File("yuanImage/运气/惨.png").getAbsoluteFile());
+            return ImageIO.read(new File("resources/yuanImage/运气/惨.png").getAbsoluteFile());
         }
         if (probability >= 0) {
-            return ImageIO.read(new File("yuanImage/运气/寄.png").getAbsoluteFile());
+            return ImageIO.read(new File("resources/yuanImage/运气/寄.png").getAbsoluteFile());
         }
         return null;
     }
@@ -94,14 +94,14 @@ public class picture {
     public static void rolePole(String averageFive, String all, ArrayList<String> fivePeoples, String alreadyCost, String limited, double probability) throws IOException {
 
         //读取图片2
-        BufferedImage withe = ImageIO.read(new File("yuanImage/withe.png").getAbsoluteFile());
+        BufferedImage withe = ImageIO.read(new File("resources/yuanImage/withe.png").getAbsoluteFile());
 
         //读取图片4
-        BufferedImage string2 = ImageIO.read(new File("yuanImage/string2.png").getAbsoluteFile());
+        BufferedImage string2 = ImageIO.read(new File("resources/yuanImage/string2.png").getAbsoluteFile());
         //读取图片5
         BufferedImage king = choseLuck(probability);
         //读取图片5
-        BufferedImage countWithe = ImageIO.read(new File("yuanImage/计数块.png").getAbsoluteFile());
+        BufferedImage countWithe = ImageIO.read(new File("resources/yuanImage/计数块.png").getAbsoluteFile());
 
         //读取图片1
         ArrayList<String> fivePeople = new ArrayList<>();
@@ -130,14 +130,14 @@ public class picture {
         picArray = new BufferedImage[fivePeople.size()];
 
         for (String picName : fivePeople) {
-            File file1 = new File("yuanImage/角色图片/" + picName + ".png");
+            File file1 = new File("resources/yuanImage/角色图片/" + picName + ".png");
             if (file1.exists()) {
                 //读取图片10
-                BufferedImage diLuKe = ImageIO.read(new File("yuanImage/角色图片/" + picName + ".png").getAbsoluteFile());
+                BufferedImage diLuKe = ImageIO.read(new File("resources/yuanImage/角色图片/" + picName + ".png").getAbsoluteFile());
                 picArray[picTimes] = diLuKe;
             } else {
                 //读取图片10
-                BufferedImage diLuKe = ImageIO.read(new File("yuanImage/default1.png").getAbsoluteFile());
+                BufferedImage diLuKe = ImageIO.read(new File("resources/yuanImage/default1.png").getAbsoluteFile());
                 picArray[picTimes] = diLuKe;
             }
             picTimes++;
@@ -151,7 +151,7 @@ public class picture {
         scaleImage(withe.getWidth(), withe.getHeight() + 506 * lines + 60 * lines);
 
         //读取图片2
-        BufferedImage withe2 = ImageIO.read(new File("yuanImage/withe2.png").getAbsoluteFile());
+        BufferedImage withe2 = ImageIO.read(new File("resources/yuanImage/withe2.png").getAbsoluteFile());
 
         //用a创建绘画对象
         Graphics2D gd = withe2.createGraphics();
@@ -206,7 +206,7 @@ public class picture {
         gd.dispose();
 
         //保存新图片
-        ImageIO.write(withe2, "png", new File("yuanImage/role pool.png").getAbsoluteFile());
+        ImageIO.write(withe2, "png", new File("resources/yuanImage/role pool.png").getAbsoluteFile());
 
     }
 
@@ -223,16 +223,16 @@ public class picture {
     public static void armsPole(String averageFive, String all, ArrayList<String> fivePeoples, String alreadyCost, String limited, double probability) throws IOException {
 
         //读取图片背景
-        BufferedImage withe = ImageIO.read(new File("yuanImage/withe.png"));
+        BufferedImage withe = ImageIO.read(new File("resources/yuanImage/withe.png"));
 
         //读取图片常驻池文字
-        BufferedImage string2 = ImageIO.read(new File("yuanImage/string3.png").getAbsoluteFile());
+        BufferedImage string2 = ImageIO.read(new File("resources/yuanImage/string3.png").getAbsoluteFile());
 
         //读取图片读取欧非判断图片
         BufferedImage king = choseLuck(probability);
 
         //读取图片读取计数块用于判断长度(可能可以优化)
-        BufferedImage countWithe = ImageIO.read(new File("yuanImage/计数块.png").getAbsoluteFile());
+        BufferedImage countWithe = ImageIO.read(new File("resources/yuanImage/计数块.png").getAbsoluteFile());
 
         ArrayList<String> fivePeople = new ArrayList<>();
         ArrayList<String> fivePeopleCounts = new ArrayList<>();
@@ -259,15 +259,15 @@ public class picture {
 
         // 读取武器图片
         for (String picName : fivePeople) {
-            File file1 = new File("yuanImage/武器图片/" + picName + ".png");
+            File file1 = new File("resources/yuanImage/武器图片/" + picName + ".png");
             // 判断此武器是否存在
             if (file1.exists()) {
                 //当存在时读取武器
-                BufferedImage armsImg = ImageIO.read(new File("yuanImage/武器图片/" + picName + ".png").getAbsoluteFile());
+                BufferedImage armsImg = ImageIO.read(new File("resources/yuanImage/武器图片/" + picName + ".png").getAbsoluteFile());
                 picArray[picTimes] = armsImg;
             } else {
                 //不存在时调用默认图片
-                BufferedImage diLuKe = ImageIO.read(new File("yuanImage/default1.png").getAbsoluteFile());
+                BufferedImage diLuKe = ImageIO.read(new File("resources/yuanImage/default1.png").getAbsoluteFile());
                 picArray[picTimes] = diLuKe;
             }
             picTimes++;
@@ -281,7 +281,7 @@ public class picture {
         scaleImage(withe.getWidth(), withe.getHeight() + 506 * lines + 60 * lines);
 
         //读取调整大小后的背景
-        BufferedImage withe2 = ImageIO.read(new File("yuanImage/withe2.png").getAbsoluteFile());
+        BufferedImage withe2 = ImageIO.read(new File("resources/yuanImage/withe2.png").getAbsoluteFile());
 
         //创建绘画画笔
         Graphics2D gd = withe2.createGraphics();
@@ -338,7 +338,7 @@ public class picture {
         gd.dispose();
 
         //保存新图片
-        ImageIO.write(withe2, "png", new File("yuanImage/arms pool.png").getAbsoluteFile());
+        ImageIO.write(withe2, "png", new File("resources/yuanImage/arms pool.png").getAbsoluteFile());
 
     }
 
@@ -356,14 +356,14 @@ public class picture {
     public static void permanentPool(String averageFive, String all, ArrayList<String> fivePeoples, String alreadyCost, String limited, double probability) throws IOException {
 
         //读取图片2
-        BufferedImage withe = ImageIO.read(new File("yuanImage/pwithe.png").getAbsoluteFile());
+        BufferedImage withe = ImageIO.read(new File("resources/yuanImage/pwithe.png").getAbsoluteFile());
 
         //读取图片4
-        BufferedImage string2 = ImageIO.read(new File("yuanImage/string4.png").getAbsoluteFile());
+        BufferedImage string2 = ImageIO.read(new File("resources/yuanImage/string4.png").getAbsoluteFile());
         //读取图片5
         BufferedImage king = choseLuck(probability);
         //读取图片5
-        BufferedImage countWithe = ImageIO.read(new File("yuanImage/计数块2.png"));
+        BufferedImage countWithe = ImageIO.read(new File("resources/yuanImage/计数块2.png"));
 
         //读取图片1
         ArrayList<String> fivePeople = new ArrayList<>();
@@ -389,14 +389,14 @@ public class picture {
         picArray = new BufferedImage[fivePeople.size()];
 
         for (String picName : fivePeople) {
-            File file1 = new File("yuanImage/常驻图片/" + picName + ".png");
+            File file1 = new File("resources/yuanImage/常驻图片/" + picName + ".png");
             if (file1.exists()) {
                 //读取图片10
-                BufferedImage armsImg = ImageIO.read(new File("yuanImage/常驻图片/" + picName + ".png").getAbsoluteFile());
+                BufferedImage armsImg = ImageIO.read(new File("resources/yuanImage/常驻图片/" + picName + ".png").getAbsoluteFile());
                 picArray[picTimes] = armsImg;
             } else {
                 //读取图片10
-                BufferedImage diLuKe = ImageIO.read(new File("yuanImage/default1.png").getAbsoluteFile());
+                BufferedImage diLuKe = ImageIO.read(new File("resources/yuanImage/default1.png").getAbsoluteFile());
                 picArray[picTimes] = diLuKe;
             }
             picTimes++;
@@ -409,7 +409,7 @@ public class picture {
         scaleImage(withe.getWidth(), withe.getHeight() + 506 * lines + 60 * lines);
 
         //读取图片2
-        BufferedImage withe2 = ImageIO.read(new File("yuanImage/withe2.png").getAbsoluteFile());
+        BufferedImage withe2 = ImageIO.read(new File("resources/yuanImage/withe2.png").getAbsoluteFile());
 
 
         //用a创建绘画对象
@@ -465,7 +465,7 @@ public class picture {
         gd.dispose();
 
         //保存新图片
-        ImageIO.write(withe2, "png", new File("yuanImage/permanent pool.png").getAbsoluteFile());
+        ImageIO.write(withe2, "png", new File("resources/yuanImage/permanent pool.png").getAbsoluteFile());
 
     }
 
@@ -480,13 +480,13 @@ public class picture {
     public static void allDataMake(String averageFive, String all, String five, double probability) throws IOException {
 
         //读取图片2
-        BufferedImage withe = ImageIO.read(new File("yuanImage/withe.png").getAbsoluteFile());
+        BufferedImage withe = ImageIO.read(new File("resources/yuanImage/withe.png").getAbsoluteFile());
 
         //读取图片5
         BufferedImage king = choseLuck(probability);
 
         //读取图片4
-        BufferedImage string1 = ImageIO.read(new File("yuanImage/string1.png").getAbsoluteFile());
+        BufferedImage string1 = ImageIO.read(new File("resources/yuanImage/string1.png").getAbsoluteFile());
 
         //用a创建绘画对象
         Graphics2D gd = withe.createGraphics();
@@ -508,7 +508,7 @@ public class picture {
         gd.dispose();
 
         //保存新图片
-        ImageIO.write(withe, "png", new File("yuanImage/allData.png").getAbsoluteFile());
+        ImageIO.write(withe, "png", new File("resources/yuanImage/allData.png").getAbsoluteFile());
     }
 
     /**
@@ -519,19 +519,19 @@ public class picture {
     public static void allPictureMake() throws Exception {
 
         //读取总数据图片
-        BufferedImage allData = ImageIO.read(new File("yuanImage/allData.png").getAbsoluteFile());
+        BufferedImage allData = ImageIO.read(new File("resources/yuanImage/allData.png").getAbsoluteFile());
 
         //读取角色池图片
-        BufferedImage rolePool = ImageIO.read(new File("yuanImage/role pool.png").getAbsoluteFile());
+        BufferedImage rolePool = ImageIO.read(new File("resources/yuanImage/role pool.png").getAbsoluteFile());
 
         //读取武器池图片
-        BufferedImage armsPool = ImageIO.read(new File("yuanImage/arms pool.png").getAbsoluteFile());
+        BufferedImage armsPool = ImageIO.read(new File("resources/yuanImage/arms pool.png").getAbsoluteFile());
 
         //读取常驻池图片
-        BufferedImage permanentPool = ImageIO.read(new File("yuanImage/permanent pool.png").getAbsoluteFile());
+        BufferedImage permanentPool = ImageIO.read(new File("resources/yuanImage/permanent pool.png").getAbsoluteFile());
 
 
-        ImageIcon sec = new ImageIcon(new File("yuanImage/sec.png").getAbsolutePath());
+        ImageIcon sec = new ImageIcon(new File("resources/yuanImage/sec.png").getAbsolutePath());
 
         BufferedImage bi = new BufferedImage(3305, 500 + allData.getHeight() + rolePool.getHeight() + armsPool.getHeight() + permanentPool.getHeight(), BufferedImage.TYPE_INT_ARGB);
 
@@ -556,7 +556,7 @@ public class picture {
         g2d.dispose();
 
         //保存新图片.getAbsoluteFile()
-        ImageIO.write(bi, "png", new File("yuanImage/finally.png").getAbsoluteFile());
+        ImageIO.write(bi, "png", new File("resources/yuanImage/finally.png").getAbsoluteFile());
     }
 
 
@@ -585,6 +585,7 @@ public class picture {
         param.setSourceRegion(rect);
         BufferedImage bi = reader.read(0, param);
         ImageIO.write(bi, targetFile.split("\\.")[1], new File(targetFile));
+        source.close();
     }
 
     /**

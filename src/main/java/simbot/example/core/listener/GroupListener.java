@@ -113,6 +113,7 @@ public class GroupListener extends Constant {
      */
     public OtherApi otherApi = new OtherApi();
 
+    Map<String, String> msgMap = new HashMap<>();
     /**
      * 日志记录
      *
@@ -129,6 +130,8 @@ public class GroupListener extends Constant {
 
         // 获取时间
         String format1 = time.tt();
+
+        msgMap.put(format1,groupMsg.getMsg());
 
         // 在控制台输出信息
         String groupMsgPutOut = "[" + format1 + "]" + "用户[" + accountInfo.getAccountNickname() + "/"
@@ -356,6 +359,11 @@ public class GroupListener extends Constant {
     }
 
 
+    @OnGroupMsgRecall
+    public void msgRecall() {
+
+    }
+
     /**
      * 刷屏模块
      * #@Filter() 注解为消息过滤器
@@ -366,8 +374,7 @@ public class GroupListener extends Constant {
     @OnGroup
     @Filter(atBot = true, value = "/刷屏", matchType = MatchType.REGEX_MATCHES, trim = true)
     public void swipe(GroupMsg groupMsg, MsgSender msgSender) {
-        AccountInfo accountInfo = groupMsg.getAccountInfo();
-        String setUser = accountInfo.getAccountCode();
+        String setUser = groupMsg.getAccountInfo().getAccountCode();
 
         if (judgeBan.allBan(groupMsg)) {
             if (setUser.equals(USERID1)) {
@@ -375,7 +382,6 @@ public class GroupListener extends Constant {
                 for (int i = 0; i < times; i++) {
                     msgSender.SENDER.sendGroupMsg(groupMsg, "阿姬在！" + face2);
                 }
-
             } else {
                 msgSender.SENDER.sendGroupMsg(groupMsg, "刷屏是不好的哦~");
             }
@@ -628,7 +634,7 @@ public class GroupListener extends Constant {
      * @throws Exception Io流异常
      */
     public void readTxt() throws Exception {
-        File idiomsTxt = new File("GameRes/随机句子.txt").getAbsoluteFile();
+        File idiomsTxt = new File("resources/GameRes/随机句子.txt").getAbsoluteFile();
         if (idiomsTxt.isFile() && idiomsTxt.exists()) {
 
             InputStreamReader reader = new InputStreamReader(new FileInputStream(idiomsTxt), StandardCharsets.UTF_8);
@@ -640,6 +646,7 @@ public class GroupListener extends Constant {
                 msgList.add(linTxt);
             }
             reader.close();
+            System.out.println("--随机句子加载成功--");
         } else {
             System.out.println("读取出错");
         }
@@ -666,4 +673,15 @@ public class GroupListener extends Constant {
             }
         }
     }
+
+    @OnGroup
+    @Filter(value = "111")
+    public void cardMsg(GroupMsg groupMsg, MsgSender msgSender) {
+        String msg = "[CAT:rich,content={\"app\":\"com.tencent.troopsharecard\"&#44;\"view\":\"contact\"&#44;\"ver\":\"1.0.0.30\"&#44;\"prompt\":\"推荐群聊\"&#44;\"meta\":{\"contact\":{\"avatar\":\"https:\\/\\/p.qlogo.cn\\/gh\\/602656352\\/602656352\\/100\"&#44;\"contact\":\"咱们大学生必备的线上超市，旨在让大家网购少踩坑，各种日常生活用品全部白菜价，比二\"&#44;\"jumpUrl\":\"https:\\/\\/jq.qq.com\\/?_wv&#61;1027&amp;k&#61;vvGvNcTL\"&#44;\"nickname\":\"校园精品超市A1\"&#44;\"tag\":\"推荐群聊\"&#44;\"tagIcon\":\"https:\\/\\/p.qlogo.cn\\/gh\\/602656352\\/602656352\\/100\"}}&#44;\"config\":{\"ctime\":1663052930&#44;\"token\":\"676e0d6bd927e0038a66e3011fb2731b\"}}]";
+
+
+        msgSender.SENDER.sendGroupMsg(groupMsg, msg);
+    }
+
+
 }
