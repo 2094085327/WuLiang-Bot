@@ -270,7 +270,7 @@ public class GroupListener extends Constant {
         if (judgeBan.allBan(groupMsg)) {
             if (groupMemberInfo.getPermission().isAdmin() || groupMemberInfo.getPermission().isOwner()) {
                 if (USERID1.equals(accountInfo.getAccountCode())) {
-                    msgSender.SENDER.sendGroupMsg(groupId, cat1 + groupMsg.getMsg());
+                    msgSender.SENDER.sendGroupMsg(groupId, cat1 + msg);
                 } else {
                     msgSender.SENDER.sendGroupMsg(groupMsg, atPeople + "你没有权限@全体成员哦");
                 }

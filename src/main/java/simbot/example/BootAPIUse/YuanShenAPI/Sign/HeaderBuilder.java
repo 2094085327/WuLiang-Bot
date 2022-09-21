@@ -54,8 +54,28 @@ public class HeaderBuilder {
                 .add("Content-Type", "application/json;charset=UTF-8")
                 .add("x-rpc-client_type", "2")
                 .add("x-rpc-app_version", "2.34.1")
-                .add("DS",HeaderParams.getDs())
+                .add("DS", HeaderParams.getDs())
                 .addAll(getBasicHeaders()).build();
+    }
+
+
+    public static Map<String, String> getHeadersMap() {
+        Map<String, String> headersMap = new HashMap<>();
+        headersMap.put("x-rpc-device_id", UUID.randomUUID().toString().replace("-", "").toUpperCase());
+        headersMap.put("Content-Type", "application/json;charset=UTF-8");
+        headersMap.put("x-rpc-client_type", "2");
+        headersMap.put("x-rpc-app_version", "2.34.1");
+        headersMap.put("DS", HeaderParams.getDs());
+        headersMap.put("Cookie", CookieStore.cookie);
+        headersMap.put("User-Agent", String.format("Mozilla/5.0 (iPhone; CPU iPhone OS 14_0_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) miHoYoBBS/%s", SignConstant.APP_VERSION));
+        headersMap.put("Referer", SignConstant.REFERER_URL);
+        headersMap.put("Accept-Encoding", "gzip, deflate, br");
+        headersMap.put("x-rpc-channel", "appstore");
+        headersMap.put("accept-language", "zh-CN,zh;q=0.9,ja-JP;q=0.8,ja;q=0.7,en-US;q=0.6,en;q=0.5");
+        headersMap.put("accept-encoding", "gzip, deflate");
+        headersMap.put("x-requested-with", "com.mihoyo.hyperion");
+        headersMap.put("Host", "api-takumi.mihoyo.com");
+        return headersMap;
     }
 
 }

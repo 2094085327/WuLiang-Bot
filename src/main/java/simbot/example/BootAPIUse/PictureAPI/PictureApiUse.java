@@ -13,6 +13,7 @@ import love.forte.simbot.api.sender.MsgSender;
 import love.forte.simbot.component.mirai.message.MiraiMessageContentBuilder;
 import love.forte.simbot.component.mirai.message.MiraiMessageContentBuilderFactory;
 import love.forte.simbot.filter.MatchType;
+import net.coobird.thumbnailator.Thumbnails;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
@@ -24,9 +25,13 @@ import simbot.example.core.common.JudgeBan;
 import simbot.example.core.common.TimeTranslate;
 
 import javax.annotation.PostConstruct;
-import java.io.*;
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
-import java.net.URLConnection;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -198,28 +203,11 @@ public class PictureApiUse extends Constant {
     public void loadImg(String url, String name) throws Exception {
         // 构造URL
         URL imgUrl = new URL(url);
-        // 打开连接
-        URLConnection con = imgUrl.openConnection();
-        // 输入流
-        InputStream is = con.getInputStream();
-        // 1K的数据缓冲
-        byte[] bs = new byte[1024];
-        // 读取到的数据长度
 
-        int len;
+        BufferedImage bufferedImage = ImageIO.read(imgUrl);
 
-        // 输出的文件流
-        File file = new File("resources/image/" + name + ".jpg").getAbsoluteFile();
+        Thumbnails.of(bufferedImage).scale(0.5).toFile(new File("resources/image/" + name + ".jpg").getAbsoluteFile());
 
-        FileOutputStream os = new FileOutputStream(file, true);
-
-        // 开始读取
-        while ((len = is.read(bs)) != -1) {
-            os.write(bs, 0, len);
-        }
-        // 完毕，关闭所有链接
-        os.close();
-        is.close();
     }
 
     /**

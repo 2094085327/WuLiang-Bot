@@ -14,7 +14,6 @@ import simbot.example.Service.BlackListService;
 import simbot.example.core.common.Constant;
 import simbot.example.core.common.JudgeBan;
 
-import java.awt.*;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -82,11 +81,7 @@ public class YuanShenApiUse extends Constant {
 
                 // 创建消息构建器，用于在服务器上发送图片
                 MessageContentBuilder messageContentBuilder = messageContentBuilderFactory.getMessageContentBuilder();
-                try {
-                    Thumbnails.of(new File("resources/yuanImage/finally.png")).scale(0.25).toFile(new File("resources/yuanImage/finally.png"));
-                } catch (Exception e) {
-                    msgSender.SENDER.sendGroupMsg(groupMsg, "压缩异常！");
-                }
+
 
                 msgSender.SENDER.sendGroupMsg(groupMsg, messageContentBuilder.image(inputStream).build());
 

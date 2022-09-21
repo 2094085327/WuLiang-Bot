@@ -17,7 +17,7 @@ public class SignConstant {
      * 切勿乱修改
      * 米游社版本
      */
-    public static final String APP_VERSION = "2.35.1";
+    public static final String APP_VERSION = "2.36.1";
 
     /**
      * 服务id

@@ -6,6 +6,7 @@ import cn.hutool.core.img.gif.GifDecoder;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.*;
+import java.net.URL;
 
 /**
  * @author zeng
@@ -16,10 +17,11 @@ public class kedaya {
 
     public byte[] makeImage(String left, String right) throws IOException {
         AnimatedGifEncoder encoder = new AnimatedGifEncoder();
+        String kedayaUrl = "https://gchat.qpic.cn/gchatpic_new/2094085327/695525945-2390472354-4DFA9F4AA8384B8CC85C5F4AD5B59575/0?term&#61;3";
 
-        File file = new File("resources/image/kedaya.gif");
+        URL url = new URL(kedayaUrl);
 
-        InputStream inputStream2 = new FileInputStream(file.getAbsoluteFile());
+        InputStream inputStream2 = url.openStream();
 
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         encoder.start(outputStream);
@@ -91,15 +93,13 @@ public class kedaya {
         }
         encoder.finish();
         inputStream2.close();
+        outputStream.close();
         return outputStream.toByteArray();
-
-
     }
 
     private void rotate(String text, Graphics2D graphics, int x, int y, double angle) {
         graphics.translate(x, y);
         graphics.rotate((Math.PI / 180) * angle);
         graphics.drawString(text, 0, 0);
-
     }
 }

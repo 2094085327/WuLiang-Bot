@@ -1,6 +1,8 @@
 package simbot.example.BootAPIUse.YuanShenAPI.Sign;
 
 
+import cn.hutool.http.HttpUtil;
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import org.json.JSONArray;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +15,7 @@ import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -106,7 +109,6 @@ public class GenShinSign {
 
         System.out.println("cookie对应的uid：" + uid);
         System.out.println("cookie对应的昵称：" + nickname);
-
         GenShinSign.uid = uid;
         nickName = nickname;
     }
@@ -135,7 +137,6 @@ public class GenShinSign {
             }
             data.put("uid", uid);
             JSONObject signResult = HttpUtils.doPost(SignConstant.SIGN_URL, HeaderBuilder.getHeaders(), data);
-            System.out.println(signResult);
             int retcode = signResult.getInteger("retcode");
             if (retcode == SignConstant.RETCODE1) {
                 message = "cookie错误或者你还没有登陆米游社哦，这个cookie是无效的";
@@ -186,7 +187,7 @@ public class GenShinSign {
         String img = jsonArray.getJSONObject(totalSignDay).getString("icon");
 
         loadImg(img);
-        SignPicture.signImg("X"+itemCnt, String.valueOf(totalSignDay+1));
+        SignPicture.signImg("X" + itemCnt, String.valueOf(totalSignDay + 1));
 
         setItemMsg("今天获取的奖励是:[" + itemName + "X" + itemCnt + "]");
         setItemImg(img);
@@ -197,7 +198,7 @@ public class GenShinSign {
      *
      * @param url 图片路径
      */
-    public void loadImg(String url)  {
+    public void loadImg(String url) {
         try {
             // 构造URL
             URL imgUrl = new URL(url);
@@ -223,7 +224,7 @@ public class GenShinSign {
             // 完毕，关闭所有链接
             os.close();
             is.close();
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
             System.out.println("下载签到奖励失败");
         }
