@@ -4,8 +4,11 @@ import net.coobird.thumbnailator.Thumbnails;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
+import java.awt.geom.RoundRectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.IOException;
+import java.net.URL;
 import java.util.Map;
 
 /**
@@ -15,7 +18,7 @@ import java.util.Map;
  * @User 86188
  */
 public class EndGame {
-    public static void makePicture(String userId, String age, Map<String, Integer> attributes) {
+    public static void makePicture(String userId, String age, Map<String, Integer> attributes, String urls) {
         int dieAge = Integer.parseInt(age);
 
         try {
@@ -83,6 +86,9 @@ public class EndGame {
             gd.drawImage(line, 119, 2244, line.getWidth(), line.getHeight(), null);
             gd.drawString("享年:" + dieAge + "岁", 237, 2412);
             gd.drawString(msg, 790, 2412);
+
+            gd.drawImage(roundImage(urls), 156, 135, roundImage(urls).getWidth(), roundImage(urls).getHeight(), null);
+
             gd.dispose();
 
             String path = "resources/GameRes/image/" + userId + ".png ";
@@ -120,5 +126,35 @@ public class EndGame {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+
+    /**
+     *
+     * @param urls 头像链接
+     * @return BufferedImage
+     * @throws IOException IO异常
+     */
+    public static BufferedImage roundImage(String urls) throws IOException {
+        BufferedImage bufferedImage = null;
+        try {
+            URL url = new URL(urls);
+            bufferedImage = ImageIO.read(url);
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.out.println("--人生重开模拟器制作圆形头像错误--");
+        }
+
+        BufferedImage outputImage = new BufferedImage(640, 640, BufferedImage.TYPE_INT_ARGB);
+        Graphics2D g2 = outputImage.createGraphics();
+        g2.setComposite(AlphaComposite.Src);
+        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        g2.setColor(Color.WHITE);
+        g2.fill(new RoundRectangle2D.Float(0, 0, 640, 640, 640, 640));
+        g2.setComposite(AlphaComposite.SrcAtop);
+        g2.drawImage(bufferedImage, 0, 0, null);
+        g2.dispose();
+        return Thumbnails.of(outputImage).scale(0.5).asBufferedImage();
+
     }
 }

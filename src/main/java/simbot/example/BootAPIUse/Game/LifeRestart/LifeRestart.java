@@ -175,7 +175,7 @@ public class LifeRestart {
 
             if (user.get(userId) != null) {
 
-                ArrayList<String> eventsList = getEvent(userId, 1);
+                ArrayList<String> eventsList = getEvent(userId, 1,groupMsg.getAccountInfo().getAccountAvatar());
                 for (String events : eventsList) {
                     msgSender.SENDER.sendGroupMsg(groupMsg, "[CAT:at,code=" + userId + "]" + events);
                 }
@@ -203,6 +203,8 @@ public class LifeRestart {
     public void randomEventAll(GroupMsg groupMsg, MsgSender msgSender, @FilterValue("times") int times) {
 
         AccountInfo accountInfo = groupMsg.getAccountInfo();
+
+        String avatar = accountInfo.getAccountAvatar();
         if (judgeBan.allBan(groupMsg)) {
 
             String userId = groupMsg.getAccountInfo().getAccountCode();
@@ -211,7 +213,7 @@ public class LifeRestart {
             if (user.get(userId) != null) {
                 int size = 20;
                 if (times <= size && times > 0) {
-                    ArrayList<String> eventsList = getEvent(userId, times);
+                    ArrayList<String> eventsList = getEvent(userId, times, avatar);
                     MiraiMessageContentBuilder builder = factory.getMessageContentBuilder();
                     //构建合并转发消息
                     builder.forwardMessage(fun -> {
@@ -283,7 +285,7 @@ public class LifeRestart {
      * @param times  继续的次数
      * @return 返回存储了信息的ArrayList
      */
-    public ArrayList<String> getEvent(String userId, int times) {
+    public ArrayList<String> getEvent(String userId, int times, String urls) {
         ArrayList<String> eventList = new ArrayList<>();
         ArrayList<String> myEventList;
 
@@ -359,7 +361,7 @@ public class LifeRestart {
                 eventList.add(user.get(userId) + "岁    你死了");
                 System.out.println(attributes.get(userId));
                 eventList.add("输入[人生重开]重新开始游戏");
-                EndGame.makePicture(userId, user.get(userId).toString(), attributes.get(userId));
+                EndGame.makePicture(userId, user.get(userId).toString(), attributes.get(userId),urls);
                 endMap.put(userId, 1);
                 user.remove(userId);
                 break;
