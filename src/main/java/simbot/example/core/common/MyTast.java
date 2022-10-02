@@ -1,8 +1,6 @@
 package simbot.example.core.common;
 
 import catcode.CatCodeUtil;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import love.forte.simbot.api.message.results.GroupMemberInfo;
 import love.forte.simbot.api.sender.BotSender;
 import love.forte.simbot.bot.Bot;
@@ -13,13 +11,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import simbot.example.BootAPIUse.OtherAPI.NewsApi;
 import simbot.example.BootAPIUse.OtherAPI.OtherApi;
-import simbot.example.BootAPIUse.YuanShenAPI.Sign.GenShinSign;
-import simbot.example.Enity.GenShinUser;
 import simbot.example.Mapper.GenShinMapper;
 import simbot.example.Service.GenShinService;
 
 import javax.annotation.Resource;
-import java.util.List;
 
 /**
  * @author zeng

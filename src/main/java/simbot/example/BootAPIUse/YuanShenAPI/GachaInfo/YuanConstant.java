@@ -10,5 +10,5 @@ public class YuanConstant {
     public static String APISTATE2 = "authkey timeout";
     public static String APISTATE3 = "OK";
 
-    public static String[] permanentInfo = {"风鹰剑", "天空之刃", "天空之傲", "天空之脊", "天空之翼", "天空之卷", "狼的末路", "磐岩结绿", "和濮鸢", "四风原典", "阿莫斯之弓", "刻晴", "迪卢克", "七七", "琴", "莫娜"};
+    public static String[] permanentInfo = {"风鹰剑", "天空之刃", "天空之傲", "天空之脊", "天空之翼", "天空之卷", "狼的末路", "磐岩结绿", "和濮鸢", "四风原典", "阿莫斯之弓", "刻晴", "迪卢克", "七七", "琴", "莫娜","提纳里"};
 }

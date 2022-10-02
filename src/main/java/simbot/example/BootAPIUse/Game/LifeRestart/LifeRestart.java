@@ -175,7 +175,7 @@ public class LifeRestart {
 
             if (user.get(userId) != null) {
 
-                ArrayList<String> eventsList = getEvent(userId, 1,groupMsg.getAccountInfo().getAccountAvatar());
+                ArrayList<String> eventsList = getEvent(userId, 1, groupMsg.getAccountInfo().getAccountAvatar());
                 for (String events : eventsList) {
                     msgSender.SENDER.sendGroupMsg(groupMsg, "[CAT:at,code=" + userId + "]" + events);
                 }
@@ -223,7 +223,7 @@ public class LifeRestart {
                     });
 
                     msgSender.SENDER.sendGroupMsg(groupMsg, builder.build());
-                    if (endMap.get(userId) == 1) {
+                    if (endMap.get(userId) != null) {
                         try {
                             InputStream inputStream = new FileInputStream(new File("resources/GameRes/image/" + userId + ".png").getAbsoluteFile());
 
@@ -304,12 +304,15 @@ public class LifeRestart {
             myEventList = myEventMap.get(userId);
 
             impArray.retainAll(myEventList);
-            while (!impArray.isEmpty()) {
+            Integer randomEve = events.getInteger("非随机事件");
+            while (!impArray.isEmpty() || randomEve != null) {
                 System.out.println("年龄:" + user.get(userId) + "旧事件" + ageStr);
+                System.out.println("非随机:" + events.getInteger("非随机事件"));
                 // 存在不可能事件，进入循环重新获取不冲突的事件
                 ageStr = ages.get((int) (Math.random() * ages.size())).toString().split("\\*")[0];
                 events = event.getJSONObject(ageStr);
                 impArray = events.getJSONArray("有某事件时一定随机不到");
+                randomEve = events.getInteger("非随机事件");
                 impArray.retainAll(myEventList);
 
                 System.out.println("新事件" + ageStr);
@@ -361,7 +364,7 @@ public class LifeRestart {
                 eventList.add(user.get(userId) + "岁    你死了");
                 System.out.println(attributes.get(userId));
                 eventList.add("输入[人生重开]重新开始游戏");
-                EndGame.makePicture(userId, user.get(userId).toString(), attributes.get(userId),urls);
+                EndGame.makePicture(userId, user.get(userId).toString(), attributes.get(userId), urls);
                 endMap.put(userId, 1);
                 user.remove(userId);
                 break;

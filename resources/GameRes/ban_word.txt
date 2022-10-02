@@ -2571,7 +2571,6 @@ boxun
 Chinaliberal
 chinamz
 Chinesenewsnet
-cnd
 Creaders
 dafa
 Dajiyuan

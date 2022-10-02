@@ -371,9 +371,11 @@ public class GroupListener extends Constant {
      * @param groupMsg  用于获取群聊消息，群成员信息等
      * @param msgSender 用于在群聊中发送消息
      */
+
     @OnGroup
     @Filter(atBot = true, value = "/刷屏", matchType = MatchType.REGEX_MATCHES, trim = true)
     public void swipe(GroupMsg groupMsg, MsgSender msgSender) {
+        // TODO 自定义刷屏次数
         String setUser = groupMsg.getAccountInfo().getAccountCode();
 
         if (judgeBan.allBan(groupMsg)) {

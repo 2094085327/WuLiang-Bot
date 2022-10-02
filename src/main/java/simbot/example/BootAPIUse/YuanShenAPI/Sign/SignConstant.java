@@ -73,7 +73,8 @@ public class SignConstant {
      */
     public static final String GENSHIN_HELP =
             "[无量姬的原神帮助]\n" +
-                    "1.【抽卡分析教程】:https://mp.weixin.qq.com/s/WcH6DgBRoAwbnmOlGTJBNg\n" +
+                    "1.【抽卡分析教程】:https://mp.weixin.qq.com/s/8zAGryJXeM7ucGWLnOPssA\n" +
+                    "通过命令窗口运行   powershell iex(irm 'https://lelaer.com/d.ps1')\n"+
                     "   ”原神抽卡分析 你的抽卡链接“" +
                     "2.【获取签到cookie教程】:https://docs.qq.com/doc/DR0R6SndxcElNck9U\n" +
                     "   米游社原神主页:https://bbs.mihoyo.com/ys/\n" +
@@ -84,7 +85,7 @@ public class SignConstant {
                     "   ②关闭/打开推送:\n    “@无量姬 打开/关闭推送”\n" +
                     "       打开/关闭每天原神米游社自动签到时的消息推送\n" +
                     "   ③原神签到:\n    “原神签到 你的UID”\n" +
-                    "   ④删除存储的cookie:\n    “删除cookie 你的UID”\n" +
+                    "   ④删除存储的cookie:\n    “解除绑定 你的UID”\n" +
                     "       只有与UID绑定的QQ号才能在二次确认后删除UID\n" +
                     "   ⑤账号查询:\n    “账号查询”" +
                     "       查询当前QQ号下所绑定的原神账户";

@@ -268,7 +268,7 @@ public class SignApiUse extends Constant {
      * @param uid      取得的uid
      */
     @OnGroup
-    @Filter(value = "删除cookie *{{uid}}", matchType = MatchType.REGEX_MATCHES, trim = true)
+    @Filter(value = "解除绑定 *{{uid}}", matchType = MatchType.REGEX_MATCHES, trim = true)
     public void start(GroupMsg groupMsg, ListenerContext context, MsgSender sender, @FilterValue("uid") String uid) {
 
         if (judgeBan.allBan(groupMsg)) {

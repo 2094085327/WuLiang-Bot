@@ -7,7 +7,6 @@ import org.json.JSONArray;
 import java.awt.*;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -169,8 +168,9 @@ public class YuanApi extends YuanConstant {
 
                     // 5星
                     fiveStar += 1;
-                    int banArms = (int) Arrays.stream(permanentInfo).filter(name::contains).count();
-                    if (banArms == 1) {
+                    boolean banPermanent = GetConstant.yuanConstant.contains(name);
+
+                    if (banPermanent) {
                         guaranteedCount += 1;
 
                         // 将歪的角色的抽数与姓名加入list
@@ -282,8 +282,8 @@ public class YuanApi extends YuanConstant {
                     // 5星
                     fiveStar += 1;
 
-                    int banArms = (int) Arrays.stream(permanentInfo).filter(name::contains).count();
-                    if (banArms == 1) {
+                    boolean banPermanent = GetConstant.yuanConstant.contains(name);
+                    if (banPermanent) {
                         guaranteedCount += 1;
 
                         // 将歪的角色的抽数与姓名加入list
