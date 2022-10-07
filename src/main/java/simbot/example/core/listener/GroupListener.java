@@ -38,6 +38,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * @author zeng
@@ -114,6 +116,7 @@ public class GroupListener extends Constant {
     public OtherApi otherApi = new OtherApi();
 
     Map<String, String> msgMap = new HashMap<>();
+
     /**
      * 日志记录
      *
@@ -131,7 +134,7 @@ public class GroupListener extends Constant {
         // 获取时间
         String format1 = time.tt();
 
-        msgMap.put(format1,groupMsg.getMsg());
+        msgMap.put(format1, groupMsg.getMsg());
 
         // 在控制台输出信息
         String groupMsgPutOut = "[" + format1 + "]" + "用户[" + accountInfo.getAccountNickname() + "/"
@@ -364,6 +367,8 @@ public class GroupListener extends Constant {
 
     }
 
+    public static Pattern pattern = Pattern.compile("\\d+");
+
     /**
      * 刷屏模块
      * #@Filter() 注解为消息过滤器
@@ -371,16 +376,20 @@ public class GroupListener extends Constant {
      * @param groupMsg  用于获取群聊消息，群成员信息等
      * @param msgSender 用于在群聊中发送消息
      */
-
     @OnGroup
-    @Filter(atBot = true, value = "/刷屏", matchType = MatchType.REGEX_MATCHES, trim = true)
+    @Filter(atBot = true, value = "/刷屏", matchType = MatchType.CONTAINS, trim = true)
     public void swipe(GroupMsg groupMsg, MsgSender msgSender) {
-        // TODO 自定义刷屏次数
+
         String setUser = groupMsg.getAccountInfo().getAccountCode();
 
         if (judgeBan.allBan(groupMsg)) {
             if (setUser.equals(USERID1)) {
-                int times = 20;
+               int times = 1;
+                Matcher matcher = pattern.matcher(groupMsg.getText());
+                if (matcher.find()) {
+                    System.out.println("匹配的值："+matcher.group());
+                    times = Integer.parseInt(matcher.group());
+                }
                 for (int i = 0; i < times; i++) {
                     msgSender.SENDER.sendGroupMsg(groupMsg, "阿姬在！" + face2);
                 }

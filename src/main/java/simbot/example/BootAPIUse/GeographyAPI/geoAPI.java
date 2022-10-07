@@ -139,7 +139,7 @@ public class geoAPI {
             if (cloud != null) {
                 weatherInfo += "\n云量：" + cloud + "%";
             }
-            return weatherInfo + "\n" + DailyWeather() + "\n" + WeatherDay();
+            return weatherInfo + "\n" + dailyWeather() + "\n" + WeatherDay();
 
         } catch (Exception e) {
             return "姬姬没有找到" + city + "的天气呢，换一个试试吧~";
@@ -187,7 +187,7 @@ public class geoAPI {
      *
      * @return 返回温馨提示
      */
-    public String DailyWeather() {
+    public String dailyWeather() {
         try {
 
 

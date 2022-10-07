@@ -20,8 +20,8 @@ public class YuanApi extends YuanConstant {
     public static double finProbability;
     public static int finFiveStar;
     public static float finCount;
-    public static float poolCount = 3;
-    public static final int PAGE = 9999;
+    private static float poolCount = 3;
+    private static final int PAGE = 9999;
 
     /**
      * 获取解析后的真实URL并加入参数
@@ -106,22 +106,10 @@ public class YuanApi extends YuanConstant {
      */
     public static void getGachaRoleInfo(String url) throws Exception {
         Robot r = new Robot();
-
-        // 5星个数
-        int fiveStar = 0;
-        // 总抽数
-        int count = 0;
-
         // 本页最后一条数据的id
         String endId = "0";
-
-        // 大保底次数
-        int guaranteedCount = 0;
-
-        // 至五星为止的次数
-        int fiveGachaCount = 0;
-
-        int alreadyCost = 0;
+        // 总抽数，大保底次数，至五星为止的次数，已抽数，5星个数
+        int count = 0,guaranteedCount = 0,fiveGachaCount = 0,alreadyCost = 0,fiveStar = 0;
 
         // 五星角色与对应抽数
         ArrayList<String> fivePeopleCount = new ArrayList<>();
@@ -165,11 +153,10 @@ public class YuanApi extends YuanConstant {
                     if (fiveStar == 0) {
                         alreadyCost = fiveGachaCount - 1;
                     }
-
                     // 5星
                     fiveStar += 1;
-                    boolean banPermanent = GetConstant.yuanConstant.contains(name);
 
+                    boolean banPermanent = GetConstant.yuanConstant.contains(name);
                     if (banPermanent) {
                         guaranteedCount += 1;
 
@@ -177,7 +164,6 @@ public class YuanApi extends YuanConstant {
                         fivePeopleCount.add(String.valueOf(fiveGachaCount));
                         fivePeopleCount.add(name + "(歪)");
                     } else {
-
                         // 没歪的角色姓名与抽数
                         fivePeopleCount.add(String.valueOf(fiveGachaCount));
                         fivePeopleCount.add(name);
@@ -185,7 +171,6 @@ public class YuanApi extends YuanConstant {
                     // 将五星计数归零
                     fiveGachaCount = 0;
                 }
-
             }
             // 延迟500ms避免被ban
             r.delay(500);
@@ -227,17 +212,8 @@ public class YuanApi extends YuanConstant {
         Robot r = new Robot();
 
         String endId = "0";
-        int count = 0;
-        // 大保底次数
-        int guaranteedCount = 0;
-
-        // 至五星为止的次数
-        int fiveGachaCount = 0;
-
-        int alreadyCost = 0;
-
-        // 5星个数
-        int fiveStar = 0;
+        // 总抽数，大保底次数，至五星为止的次数，已抽数，5星个数
+        int count = 0,guaranteedCount = 0,fiveGachaCount = 0,alreadyCost = 0,fiveStar = 0;
 
         // 五星角色与对应抽数
         ArrayList<String> fivePeopleCount = new ArrayList<>();
@@ -291,7 +267,6 @@ public class YuanApi extends YuanConstant {
                         fivePeopleCount.add(name + "(歪)");
 
                     } else {
-
                         // 没歪的角色姓名与抽数
                         fivePeopleCount.add(String.valueOf(fiveGachaCount));
                         fivePeopleCount.add(name);
@@ -340,15 +315,8 @@ public class YuanApi extends YuanConstant {
         Robot r = new Robot();
 
         String endId = "0";
-        int count = 0;
-
-        // 至五星为止的次数
-        int fiveGachaCount = 0;
-
-        int alreadyCost = 0;
-
-        // 5星个数
-        int fiveStar = 0;
+        // 总抽数，至五星为止的次数，已抽数，5星个数
+        int count = 0,fiveGachaCount = 0,alreadyCost = 0,fiveStar = 0;
 
         // 五星角色与对应抽数
         ArrayList<String> fivePeopleCount = new ArrayList<>();

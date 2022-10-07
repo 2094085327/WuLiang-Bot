@@ -3,7 +3,6 @@ package simbot.example.BootAPIUse.Game.LifeRestart;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import love.forte.simbot.annotation.Filter;
-import love.forte.simbot.annotation.FilterValue;
 import love.forte.simbot.annotation.OnGroup;
 import love.forte.simbot.api.message.MessageContentBuilder;
 import love.forte.simbot.api.message.MessageContentBuilderFactory;
@@ -28,6 +27,8 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * @Author zeng
@@ -86,7 +87,6 @@ public class LifeRestart {
         } catch (Exception e) {
             e.printStackTrace();
         }
-
     }
 
     @PostConstruct
@@ -159,6 +159,8 @@ public class LifeRestart {
         }
     }
 
+    public static Pattern pattern = Pattern.compile("\\d+");
+
     /**
      * 收到继续指令后发送下一条人生事件
      *
@@ -166,91 +168,70 @@ public class LifeRestart {
      * @param msgSender 消息发送
      */
     @OnGroup
-    @Filter(value = "继续")
+    @Filter(value = "继续", matchType = MatchType.STARTS_WITH)
     public void randomEvent(GroupMsg groupMsg, MsgSender msgSender) {
 
         if (judgeBan.allBan(groupMsg)) {
 
             String userId = groupMsg.getAccountInfo().getAccountCode();
+            AccountInfo accountInfo = groupMsg.getAccountInfo();
+            String avatar = accountInfo.getAccountAvatar();
 
             if (user.get(userId) != null) {
-
-                ArrayList<String> eventsList = getEvent(userId, 1, groupMsg.getAccountInfo().getAccountAvatar());
-                for (String events : eventsList) {
-                    msgSender.SENDER.sendGroupMsg(groupMsg, "[CAT:at,code=" + userId + "]" + events);
+                Matcher matcher = pattern.matcher(groupMsg.getText());
+                int times = 1;
+                if (matcher.find()) {
+                    times = Integer.parseInt(matcher.group());
                 }
+                if (times == 1) {
 
-            } else {
-                if (unUser.get(userId) == null) {
-                    msgSender.SENDER.sendGroupMsg(groupMsg, "[CAT:at,code=" + userId + "]你还没有创建账户,输入[人生重开]开始游戏");
-                    unUser.put(userId, 1);
-                } else {
-                    unUser.put(userId, unUser.get(userId) + 1);
-                }
-            }
-        }
-    }
-
-    /**
-     * 继续的加强版，能够自定义事件数，但限制上限为20
-     *
-     * @param groupMsg  群聊
-     * @param msgSender 消息发送
-     * @param times     运行次数
-     */
-    @OnGroup
-    @Filter(value = "继续 *{{times}}", matchType = MatchType.REGEX_MATCHES, trim = true)
-    public void randomEventAll(GroupMsg groupMsg, MsgSender msgSender, @FilterValue("times") int times) {
-
-        AccountInfo accountInfo = groupMsg.getAccountInfo();
-
-        String avatar = accountInfo.getAccountAvatar();
-        if (judgeBan.allBan(groupMsg)) {
-
-            String userId = groupMsg.getAccountInfo().getAccountCode();
-
-            // 账户存在时进行循环
-            if (user.get(userId) != null) {
-                int size = 20;
-                if (times <= size && times > 0) {
-                    ArrayList<String> eventsList = getEvent(userId, times, avatar);
-                    MiraiMessageContentBuilder builder = factory.getMessageContentBuilder();
-                    //构建合并转发消息
-                    builder.forwardMessage(fun -> {
-                        for (String s : eventsList) {
-                            fun.add(accountInfo, s);
-                        }
-                    });
-
-                    msgSender.SENDER.sendGroupMsg(groupMsg, builder.build());
-                    if (endMap.get(userId) != null) {
-                        try {
-                            InputStream inputStream = new FileInputStream(new File("resources/GameRes/image/" + userId + ".png").getAbsoluteFile());
-
-                            // 创建消息构建器，用于在服务器上发送图片
-                            MessageContentBuilder messageContentBuilder = messageContentBuilderFactory.getMessageContentBuilder();
-
-                            msgSender.SENDER.sendGroupMsg(groupMsg, messageContentBuilder.image(inputStream).build());
-
-                            inputStream.close();
-                            endMap.remove(userId);
-                            Files.delete(Paths.get(new File("resources/GameRes/image/" + userId + ".png").getAbsolutePath()));
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
+                    ArrayList<String> eventsList = getEvent(userId, 1, groupMsg.getAccountInfo().getAccountAvatar());
+                    for (String events : eventsList) {
+                        msgSender.SENDER.sendGroupMsg(groupMsg, "[CAT:at,code=" + userId + "]" + events);
                     }
                 } else {
-                    // 输入的循环次数超过20时进行提示并加入防刷屏名单
-                    msgSender.SENDER.sendGroupMsg(groupMsg, "[CAT:at,code=" + userId + "]只能输入到0~20哦~");
-                    unUser.put(userId, 1);
+                    int size = 20;
+                    if (times <= size && times > 0) {
+                        ArrayList<String> eventsList = getEvent(userId, times, avatar);
+                        MiraiMessageContentBuilder builder = factory.getMessageContentBuilder();
+                        //构建合并转发消息
+                        builder.forwardMessage(fun -> {
+                            for (String s : eventsList) {
+                                fun.add(accountInfo, s);
+                            }
+                        });
+
+                        msgSender.SENDER.sendGroupMsg(groupMsg, builder.build());
+                    }else {
+                        if (unUser.get(userId) == null) {
+                            msgSender.SENDER.sendGroupMsg(groupMsg,"[CAT:at,code=" + userId + "]只能输入0~20哦");
+                            unUser.put(userId, 1);
+                        } else {
+                            unUser.put(userId, unUser.get(userId) + 1);
+                        }
+                    }
+                }
+                if (endMap.get(userId) != null) {
+                    try {
+                        InputStream inputStream = new FileInputStream(new File("resources/GameRes/image/" + userId + ".png").getAbsoluteFile());
+
+                        // 创建消息构建器，用于在服务器上发送图片
+                        MessageContentBuilder messageContentBuilder = messageContentBuilderFactory.getMessageContentBuilder();
+
+                        msgSender.SENDER.sendGroupMsg(groupMsg, messageContentBuilder.image(inputStream).build());
+
+                        inputStream.close();
+                        endMap.remove(userId);
+                        Files.delete(Paths.get(new File("resources/GameRes/image/" + userId + ".png").getAbsolutePath()));
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
                 }
             } else {
-                // 当防刷屏名单中不存在此账户时进行提示
                 if (unUser.get(userId) == null) {
                     msgSender.SENDER.sendGroupMsg(groupMsg, "[CAT:at,code=" + userId + "]你还没有创建账户,输入[人生重开]开始游戏");
                     unUser.put(userId, 1);
                 } else {
-                    // 存在时+1
                     unUser.put(userId, unUser.get(userId) + 1);
                 }
             }

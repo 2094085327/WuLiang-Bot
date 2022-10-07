@@ -7,7 +7,6 @@ import love.forte.simbot.api.message.MessageContentBuilderFactory;
 import love.forte.simbot.api.message.events.GroupMsg;
 import love.forte.simbot.api.sender.MsgSender;
 import love.forte.simbot.filter.MatchType;
-import net.coobird.thumbnailator.Thumbnails;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import simbot.example.Service.BlackListService;
@@ -52,7 +51,7 @@ public class YuanShenApiUse extends Constant {
 
         if (judgeBan.allBan(groupMsg)) {
 
-            String url = YuanApi.toUrl(groupMsg.getMsg());
+            String url = YuanApi.toUrl(groupMsg.getText());
             String urlCheckType = YuanApi.checkApi(url);
             if (!YuanConstant.APISTATE3.equals(urlCheckType)) {
                 assert urlCheckType != null;
@@ -81,7 +80,6 @@ public class YuanShenApiUse extends Constant {
 
                 // 创建消息构建器，用于在服务器上发送图片
                 MessageContentBuilder messageContentBuilder = messageContentBuilderFactory.getMessageContentBuilder();
-
 
                 msgSender.SENDER.sendGroupMsg(groupMsg, messageContentBuilder.image(inputStream).build());
 

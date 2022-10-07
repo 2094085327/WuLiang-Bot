@@ -161,10 +161,7 @@ public class picture {
         //把图片d画上去
         gd.drawImage(string2, 1112, 100, string2.getWidth(), string2.getHeight(), null);
 
-        int roleX = 58;
-        int n = 1;
-        int counts = 0;
-        int lineX = 1;
+        int roleX = 58,n = 1,counts = 0,lineX = 1;
         for (int i = 1; i < fivePeople.size() + 1; i++) {
 
             //把角色画上去
@@ -664,6 +661,4 @@ public class picture {
             return false;
         }
     }
-
-
 }
